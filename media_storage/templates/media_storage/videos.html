@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vidéos</title>
+</head>
+<body>
+    <h1>Liste des Vidéos</h1>
+    <ul>
+        {% for video in videos %}
+        <li>
+            <h2>{{ video.title }}</h2>
+            <video controls>
+                <source src="{{ video.video.url }}" type="video/mp4">
+                Votre navigateur ne supporte pas la balise vidéo.
+            </video>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

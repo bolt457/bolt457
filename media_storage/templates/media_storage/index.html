@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Accueil</title>
+</head>
+<body>
+    <h1>Bienvenue sur Mon Application</h1>
+    <form method="get" action="{% url 'tubidy_search' %}">
+        <input type="text" name="q" placeholder="Rechercher...">
+        <button type="submit">Rechercher</button>
+    </form>
+    <ul>
+        <li><a href="/videos/">Voir les vidéos</a></li>
+        <li><a href="/images/">Télécharger des images</a></li>
+        <li><a href="/music/">Télécharger de la musique</a></li>
+        <li><a href="/upload/video/">Télécharger des vidéos</a></li>
+    </ul>
+</body>
+</html>

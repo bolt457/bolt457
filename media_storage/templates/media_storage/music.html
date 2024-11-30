@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Musique</title>
+</head>
+<body>
+    <h1>Liste de Musique</h1>
+    <ul>
+        {% for music in music %}
+        <li>
+            <h2>{{ music.title }}</h2>
+            <audio controls>
+                <source src="{{ music.music.url }}" type="audio/mpeg">
+                Votre navigateur ne supporte pas la balise audio.
+            </audio>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Résultats de Recherche Tubidy</title>
+</head>
+<body>
+    <h1>Résultats de Recherche Tubidy</h1>
+    <form method="get" action="{% url 'tubidy_search' %}">
+        <input type="text" name="q" placeholder="Rechercher...">
+        <button type="submit">Rechercher</button>
+    </form>
+    <ul>
+        {% for result in results %}
+        <li>
+            <h2>{{ result.title }}</h2>
+            <a href="{{ result.download_url }}">Télécharger</a>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
