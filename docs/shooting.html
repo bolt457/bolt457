@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tir - AfricoinMarket</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #shooting-container { width: 80%; margin: 0 auto; text-align: center; }
+        .target { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            position: absolute; 
+            cursor: pointer; 
+            animation: pop 0.5s ease-in-out;
+        }
+        .good { background-color: green; }
+        .bad { background-color: red; }
+        .magic { background-color: gold; }
+        #timer { font-weight: bold; color: red; margin-bottom: 20px; }
+        #score { margin-top: 20px; font-size: 1.2em; }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Jeu de Tir - AfricoinMarket</h1>
+    </header>
+    <main id="shooting-container">
+        <p id="timer">Temps restant : <span id="time">--</span> secondes</p>
+        <div id="game-area" style="position:relative; width:100%; height:400px; border:1px solid #000;">
+            <!-- Les cibles apparaîtront ici -->
+        </div>
+        <p id="score">Score : 0</p>
+        <button id="start-btn" onclick="startGame()">Commencer</button>
+        <div id="result"></div>
+    </main>
+
+    <script>
+        let score = 0;
+        let timer;
+        let timeLeft = 30;
+        let interval;
+        const betAmount = parseInt(new URLSearchParams(window.location.search).get('bet')) || 0;
+        const gameArea = document.getElementById('game-area');
+        const goodTargetPoints = 5;
+        const badTargetPenalty = -5;
+        const magicTargetPoints = 10;
+        const pointsPerAfricoin = 150;
+
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            document.getElementById('score').innerText = `Score : ${score}`;
+            document.getElementById('result').innerText = "";
+            document.getElementById('time').innerText = timeLeft;
+            document.getElementById('start-btn').disabled = true;
+
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('time').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    clearInterval(interval);
+                    endGame();
+                }
+            }, 1000);
+
+            interval = setInterval(spawnTarget, 700); // Plus rapide
+        }
+
+        function spawnTarget() {
+            const target = document.createElement('div');
+            target.classList.add('target');
+            const targetType = Math.random();
+
+            if (targetType < 0.6) {
+                target.classList.add('good');
+            } else if (targetType < 0.9) {
+                target.classList.add('bad');
+            } else {
+                target.classList.add('magic');
+            }
+
+            target.style.top = Math.random() * (gameArea.offsetHeight - 50) + 'px';
+            target.style.left = Math.random() * (gameArea.offsetWidth - 50) + 'px';
+
+            target.addEventListener('click', () => {
+                if (target.classList.contains('good')) {
+                    score += goodTargetPoints;
+                } else if (target.classList.contains('bad')) {
+                    score += badTargetPenalty;
+                } else if (target.classList.contains('magic')) {
+                    score += magicTargetPoints;
+                }
+                document.getElementById('score').innerText = `Score : ${score}`;
+                target.style.transform = "scale(0)"; // Animation pour clic
+                setTimeout(() => gameArea.removeChild(target), 200);
+            });
+
+            gameArea.appendChild(target);
+
+            // Vitesse augmentée avec le temps
+            const targetLifetime = score >= 100 ? 700 : 1000; // Disparaît plus vite si score élevé
+
+            setTimeout(() => {
+                if (gameArea.contains(target)) {
+                    gameArea.removeChild(target);
+                }
+            }, targetLifetime);
+        }
+
+        function endGame() {
+            document.getElementById('start-btn').disabled = false;
+            const resultDiv = document.getElementById('result');
+
+            if (score >= pointsPerAfricoin) {
+                const africoinsEarned = Math.floor(score / pointsPerAfricoin);
+                resultDiv.innerText = `Bravo ! Vous avez gagné ${africoinsEarned} AFRICOINS !`;
+                // Ajouter ici la logique pour récompenser l'utilisateur
+            } else {
+                resultDiv.innerText = "Désolé, vous n'avez pas accumulé assez de points pour gagner des AFRICOINS.";
+            }
+        }
+    </script>
+</body>
+</html>

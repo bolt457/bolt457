@@ -1,0 +1,26 @@
+[debug] [2024-12-17T08:54:23.469Z] ----------------------------------------------------------------------
+[debug] [2024-12-17T08:54:23.479Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\newuser\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2024-12-17T08:54:23.480Z] CLI Version:   13.29.1
+[debug] [2024-12-17T08:54:23.480Z] Platform:      win32
+[debug] [2024-12-17T08:54:23.480Z] Node Version:  v22.12.0
+[debug] [2024-12-17T08:54:23.481Z] Time:          Tue Dec 17 2024 09:54:23 GMT+0100 (heure normale d’Europe centrale)
+[debug] [2024-12-17T08:54:23.481Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-12-17T08:54:23.593Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-12-17T08:54:23.594Z] > authorizing via signed-in user (giselleboltronne@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\AfricoinMarket\public
+
+Before we get started, keep in mind:
+
+  * You are currently outside your home directory
+  * You are initializing within an existing Firebase project directory
+

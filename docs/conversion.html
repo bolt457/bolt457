@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acheter Africoins</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        let exchangeRateUsdToAfricoin = 1; // 1 USD = 1 AFRICOIN (référence)
+
+        // Fonction pour afficher le formulaire de paiement selon la méthode choisie
+        function displayPaymentForm(method) {
+            const formContainer = document.getElementById('payment-form-container');
+            let formContent = `
+                <label for="africoin-amount">Nombre d'Africoins à acheter :</label>
+                <input type="number" id="africoin-amount" placeholder="Montant en Africoins" min="1" required>
+                <p id="total-cost"></p>
+            `;
+
+            switch (method) {
+                case 'Mobile Money':
+                    formContent += `
+                        <h4>Mobile Money</h4>
+                        <label for="mobile-number">Numéro de téléphone :</label>
+                        <input type="text" id="mobile-number" placeholder="Votre numéro Mobile Money" required>
+                        <label for="mobile-pin">Code secret :</label>
+                        <input type="password" id="mobile-pin" placeholder="Votre code secret" required>
+                    `;
+                    break;
+                case 'Visa':
+                case 'Mastercard':
+                    formContent += `
+                        <h4>${method}</h4>
+                        <label for="card-number">Numéro de carte :</label>
+                        <input type="text" id="card-number" placeholder="XXXX-XXXX-XXXX-XXXX" required>
+                        <label for="card-expiry">Date d'expiration :</label>
+                        <input type="text" id="card-expiry" placeholder="MM/AA" required>
+                        <label for="card-cvv">CVV :</label>
+                        <input type="password" id="card-cvv" placeholder="XXX" required>
+                    `;
+                    break;
+                case 'PayPal':
+                    formContent += `
+                        <h4>PayPal</h4>
+                        <label for="paypal-email">Email PayPal :</label>
+                        <input type="email" id="paypal-email" placeholder="Votre email PayPal" required>
+                    `;
+                    break;
+                default:
+                    formContent = '<p>Veuillez sélectionner une méthode de paiement.</p>';
+            }
+
+            formContent += `<button onclick="validateAndBuy('${method}')">Valider et Acheter</button>`;
+            formContainer.innerHTML = formContent;
+
+            // Mettre à jour le coût total
+            document.getElementById('africoin-amount').addEventListener('input', updateTotalCost);
+        }
+
+        // Fonction pour mettre à jour le coût total
+        function updateTotalCost() {
+            const africoinAmount = document.getElementById('africoin-amount').value;
+            const totalCost = africoinAmount * exchangeRateUsdToAfricoin;
+            document.getElementById('total-cost').textContent = `Coût total : ${totalCost.toFixed(2)} USD (référence)`;
+        }
+
+        // Fonction pour valider le formulaire et acheter des Africoins
+        function validateAndBuy(method) {
+            const africoinAmount = document.getElementById('africoin-amount').value;
+
+            if (!africoinAmount || africoinAmount <= 0) {
+                alert("Veuillez entrer un nombre valide d'Africoins.");
+                return;
+            }
+
+            let isValid = true;
+            switch (method) {
+                case 'Mobile Money':
+                    const mobileNumber = document.getElementById('mobile-number').value;
+                    const mobilePin = document.getElementById('mobile-pin').value;
+                    if (!mobileNumber || !mobilePin) {
+                        alert("Veuillez remplir toutes les informations Mobile Money.");
+                        isValid = false;
+                    }
+                    break;
+                case 'Visa':
+                case 'Mastercard':
+                    const cardNumber = document.getElementById('card-number').value;
+                    const cardExpiry = document.getElementById('card-expiry').value;
+                    const cardCvv = document.getElementById('card-cvv').value;
+                    if (!cardNumber || !cardExpiry || !cardCvv) {
+                        alert("Veuillez remplir toutes les informations de carte.");
+                        isValid = false;
+                    }
+                    break;
+                case 'PayPal':
+                    const paypalEmail = document.getElementById('paypal-email').value;
+                    if (!paypalEmail) {
+                        alert("Veuillez entrer votre email PayPal.");
+                        isValid = false;
+                    }
+                    break;
+                default:
+                    alert("Méthode de paiement non reconnue.");
+                    isValid = false;
+            }
+
+            if (isValid) {
+                alert(`Votre achat de ${africoinAmount} Africoins avec ${method} a été validé.`);
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="stars.html">Stars</a></li>
+                <li><a href="statistics.html">Statistiques</a></li>
+                <li><a href="shop.html">Acheter AFRICOINS</a></li>
+                <li><a href="account.html">Mon Compte</a></li>
+                <li><a href="ads.html">Publicités</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Convertissez vos devises</h2>
+        <p>Taux de change actuel : 1 USD = 1 AFRICOIN (référence)</p>
+
+        <section id="payment-section">
+            <h3>Méthode de paiement</h3>
+            <select onchange="displayPaymentForm(this.value)">
+                <option value="">Sélectionnez une méthode</option>
+                <option value="Mobile Money">Mobile Money</option>
+                <option value="Visa">Visa</option>
+                <option value="Mastercard">Mastercard</option>
+                <option value="PayPal">PayPal</option>
+            </select>
+
+            <!-- Formulaire dynamique pour la méthode de paiement -->
+            <div id="payment-form-container"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 AfricoinMarket</p>
+    </footer>
+</body>
+
+</html>

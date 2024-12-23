@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investir en Africoins</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="investment-section">
+        <h1>Investir en Africoins</h1>
+        <form id="investmentForm">
+            <label for="companyName">Nom de l'Entreprise :</label>
+            <input type="text" id="companyName" required placeholder="Entrez le nom de l'entreprise">
+
+            <label for="amount">Montant à Investir (en Africoins) :</label>
+            <input type="number" id="amount" min="1" required placeholder="Montant en Africoins">
+
+            <button type="submit">Investir</button>
+        </form>
+
+        <h2>Investissements Réalisés :</h2>
+        <ul id="investmentList"></ul>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

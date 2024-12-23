@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AfricoinMarket - Mon Compte</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Accueil</a></li>
+                <li><a href="/stars">Stars</a></li>
+                <li><a href="/statistics">Statistiques</a></li>
+                <li><a href="/shop">Acheter AFRICOINS</a></li>
+                <li><a href="/account">Mon Compte</a></li> 
+				<script src="/js/wallet.js"></script>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Mon Compte Virtuel</h1>
+
+        <!-- Affichage des informations de compte -->
+        <div>
+            <p><strong>Nom d'utilisateur :</strong> <span id="username-display">Invité</span></p>
+            <p><strong>Solde AFRICOINS :</strong> <span id="balance-display">0</span></p>
+            <p><strong>Produits achetés :</strong> <span id="products-purchased">0</span></p>
+            <p><strong>Valeur totale des produits achetés (AFRICOINS) :</strong> <span id="total-value">0</span></p>
+        </div>
+
+        <!-- Tableau de bord des investissements -->
+        <section id="dashboard-section">
+            <h2>Tableau de Bord des Investissements</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Star</th>
+                        <th>Investissement (AFRICOINS)</th>
+                        <th>Variation (%)</th>
+                        <th>Valeur Actuelle (AFRICOINS)</th>
+                    </tr>
+                </thead>
+                <tbody id="investment-dashboard">
+                    <!-- Les données des investissements seront ajoutées dynamiquement -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Formulaire de déconnexion -->
+        <section id="logout-section">
+            <button id="logout-button">Se déconnecter</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 AfricoinMarket</p>
+    </footer>
+
+    <!-- Inclure les scripts JavaScript -->
+    <script src="/js/firebaseConfig.js" type="module"></script>
+    <script src="/js/auth.js" type="module"></script>
+    <script src="/js/exchangeRate.js" type="module"></script>
+    <script src="/js/scripts.js"></script> 
+	<script src="/js/wallet.js"></script>
+
+    <script>
+        // Données d'exemple pour les stars et investissements
+        const stars = [
+            { name: "Star A", investment: 1000, variation: 0 },
+            { name: "Star B", investment: 500, variation: 0 },
+            { name: "Star C", investment: 2000, variation: 0 },
+        ];
+
+        // Données d'exemple pour les produits achetés
+        const purchasedProducts = [
+            { name: "Produit 1", value: 200 },
+            { name: "Produit 2", value: 150 },
+            { name: "Produit 3", value: 300 },
+        ];
+
+        // Fonction pour afficher le solde d'AFRICOINS
+        function displayBalance() {
+            const balance = localStorage.getItem('balance') || 0;
+            document.getElementById('balance-display').innerText = balance;
+        }
+
+        // Fonction pour afficher le tableau de bord des investissements
+        function displayInvestments() {
+            const dashboard = document.getElementById('investment-dashboard');
+            dashboard.innerHTML = '';
+
+            stars.forEach((star, index) => {
+                const currentValue = star.investment + (star.investment * star.variation / 100);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${star.name}</td>
+                    <td>${star.investment.toFixed(2)}</td>
+                    <td>${star.variation.toFixed(2)}%</td>
+                    <td>${currentValue.toFixed(2)}</td>
+                `;
+                dashboard.appendChild(row);
+            });
+        }
+
+        // Simulation de variations des investissements
+        function updateInvestmentVariations() {
+            stars.forEach(star => {
+                const randomVariation = (Math.random() * 10 - 5).toFixed(2); // Variation entre -5% et +5%
+                star.variation = parseFloat(randomVariation);
+            });
+            displayInvestments();
+        }
+
+        // Fonction pour afficher les produits achetés et leur valeur totale
+        function displayPurchasedProducts() {
+            const productCount = purchasedProducts.length;
+            const totalValue = purchasedProducts.reduce((sum, product) => sum + product.value, 0);
+
+            document.getElementById('products-purchased').innerText = productCount;
+            document.getElementById('total-value').innerText = totalValue;
+        }
+
+        // Fonction pour ajouter des AFRICOINS achetés au compte
+        function addPurchasedCoins(amount) {
+            let balance = parseFloat(localStorage.getItem('balance')) || 0;
+            balance += amount;
+            localStorage.setItem('balance', balance);
+            displayBalance();
+        }
+
+        // Appel des fonctions au chargement de la page
+        displayBalance();
+        displayInvestments();
+        displayPurchasedProducts();
+        setInterval(updateInvestmentVariations, 5000); // Met à jour les variations toutes les 5 secondes
+
+        // Fonction de déconnexion
+        document.getElementById('logout-button').addEventListener('click', function () {
+            localStorage.removeItem('username');
+            localStorage.removeItem('password');
+            localStorage.removeItem('balance');
+            alert('Vous êtes déconnecté.');
+            window.location.href = '/'; // Redirection vers la page d'accueil
+        });
+
+        // Exemple : Ajouter des AFRICOINS au compte (simulé ici)
+        addPurchasedCoins(1500); // Ajouter 1500 AFRICOINS après un achat simulé
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publicités et Collecte de Fonds - AfricoinMarket</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/ads.js" defer></script> <!-- Lien vers le fichier JavaScript -->
+    <style>
+        /* Styles pour le formulaire de publicité */
+        #ad-upload {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #ad-list {
+            margin-top: 20px;
+        }
+        .ad-item {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="stars.html">Stars</a></li>
+                <li><a href="statistics.html">Statistiques</a></li>
+                <li><a href="shop.html">Acheter AFRICOINS</a></li>
+                <li><a href="account.html">Mon Compte</a></li>
+                <li><a href="ads.html">Publicités</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Formulaire d'importation de publicités -->
+        <section id="ad-upload">
+            <h3>Importer une Publicité</h3>
+            <form id="ad-form">
+                <label for="ad-type">Type de publicité :</label>
+                <select id="ad-type" required>
+                    <option value="local">Fichier Local</option>
+                    <option value="web">Lien Web</option>
+                </select>
+                <div id="file-inputs">
+                    <label for="ad-file" style="display: none;">Sélectionnez votre fichier :</label>
+                    <input type="file" id="ad-file" accept="image/*" style="display: none;" />
+                    <label for="ad-url" style="display: none;">Entrez l'URL de la publicité :</label>
+                    <input type="url" id="ad-url" placeholder="Entrez l'URL de la publicité" style="display: none;" />
+                </div>
+                <button type="submit">Soumettre</button>
+            </form>
+            <div id="ad-list">
+                <h4>Publicités Importées :</h4>
+                <!-- Les publicités soumises s'afficheront ici -->
+            </div>
+        </section>
+
+        <h2>Publicité, Collecte de Fonds & Partenariats</h2>
+        <p>Explorez des plateformes fiables pour soumettre votre projet AfricoinMarket et trouver des partenaires ou des investisseurs potentiels.</p>
+
+        <!-- Collecte de fonds et partenariats -->
+        <section id="crowdfunding">
+            <h3>Soumettre votre Projet</h3>
+            <p>Voici des plateformes où vous pouvez soumettre votre projet et votre vision :</p>
+            <ul>
+                <li><a href="https://vc4a.com/" target="_blank">VC4A (Venture Capital for Africa)</a></li>
+                <li><a href="https://africarena.com/" target="_blank">AfricArena</a></li>
+                <li><a href="https://www.tonyelumelufoundation.org/" target="_blank">Tony Elumelu Foundation</a></li>
+                <li><a href="https://startupbootcamp.org/" target="_blank">Startupbootcamp</a></li>
+                <li><a href="https://www.afdb.org/en/topics-and-sectors/initiatives-partnerships/africa-investment-forum" target="_blank">Africa Investment Forum</a></li>
+                <li><a href="https://www.seedstars.com/" target="_blank">Seedstars</a></li>
+                <li><a href="https://endeavor.org/" target="_blank">Endeavor</a></li>
+            </ul>
+        </section>
+
+        <!-- Section Feedback -->
+        <section id="feedback">
+            <h3>Partagez votre expérience</h3>
+            <p>Vous avez utilisé l'une des plateformes ci-dessus ? Partagez votre feedback ou les résultats obtenus pour inspirer la communauté.</p>
+            <form id="feedback-form">
+                <label for="platform">Sélectionnez la plateforme :</label>
+                <select id="platform" required>
+                    <option value="">-- Sélectionnez --</option>
+                    <option value="VC4A">VC4A</option>
+                    <option value="AfricArena">AfricArena</option>
+                    <option value="Tony Elumelu Foundation">Tony Elumelu Foundation</option>
+                    <option value="Startupbootcamp">Startupbootcamp</option>
+                    <option value="Africa Investment Forum">Africa Investment Forum</option>
+                    <option value="Seedstars">Seedstars</option>
+                    <option value="Endeavor">Endeavor</option>
+                </select>
+                <label for="feedback-text">Votre retour :</label>
+                <textarea id="feedback-text" rows="4" placeholder="Décrivez votre expérience..." required></textarea>
+                <button type="submit">Soumettre</button>
+            </form>
+
+            <div id="feedback-list">
+                <h4>Feedback des utilisateurs :</h4>
+                <!-- Les feedbacks soumis s'afficheront ici -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 AfricoinMarket</p>
+    </footer>
+
+    <script>
+        // Gestion du formulaire de publicité
+        const adForm = document.getElementById('ad-form');
+        const adList = document.getElementById('ad-list');
+        const adFile = document.getElementById('ad-file');
+        const adUrl = document.getElementById('ad-url');
+        const adType = document.getElementById('ad-type');
+        const fileInputs = document.getElementById('file-inputs');
+
+        adType.addEventListener('change', (event) => {
+            if (event.target.value === 'local') {
+                adFile.style.display = 'block';
+                adUrl.style.display = 'none';
+                adUrl.value = ''; // Réinitialiser l'URL
+                adFile.previousElementSibling.style.display = 'block'; // Afficher le label pour le fichier
+                adUrl.previousElementSibling.style.display = 'none'; // Masquer le label pour l'URL
+            } else {
+                adFile.style.display = 'none';
+                adUrl.style.display = 'block';
+                adFile.value = ''; // Réinitialiser le fichier
+                adUrl.previousElementSibling.style.display = 'block'; // Afficher le label pour l'URL
+                adFile.previousElementSibling.style.display = 'none'; // Masquer le label pour le fichier
+            }
+        });
+
+        adForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Empêche le rechargement de la page
+
+            let adItem = document.createElement('div');
+            adItem.classList.add('ad-item');
+
+            if (adType.value === 'local') {
+                const file = adFile.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        adItem.innerHTML = `<img src="${e.target.result}" alt="Publicité" style="max-width: 200px; margin: 10px;" />`;
+                        adList.appendChild(adItem);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } else {
+                const url = adUrl.value;
+                adItem.innerHTML = `<a href="${url}" target="_blank"><img src="${url}" alt="Publicité" style="max-width: 200px; margin: 10px;" /></a>`;
+                adList.appendChild(adItem);
+            }
+
+            // Réinitialisation du formulaire
+            adForm.reset();
+            adFile.style.display = 'none';
+            adUrl.style.display = 'none';
+            adFile.previousElementSibling.style.display = 'none'; // Masquer le label
+            adUrl.previousElementSibling.style.display = 'none'; // Masquer le label
+        });
+
+        // Gestion du formulaire de feedback
+        const feedbackForm = document.getElementById('feedback-form');
+        const feedbackList = document.getElementById('feedback-list');
+
+        feedbackForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Empêche le rechargement de la page
+
+            // Récupération des valeurs du formulaire
+            const platform = document.getElementById('platform').value;
+            const feedbackText = document.getElementById('feedback-text').value;
+
+            // Validation basique
+            if (!platform || !feedbackText) {
+                alert('Veuillez remplir tous les champs.');
+                return;
+            }
+
+            // Création d'un nouvel élément de feedback
+            const feedbackItem = document.createElement('div');
+            feedbackItem.classList.add('feedback-item');
+            feedbackItem.innerHTML = `
+                <p><strong>Plateforme :</strong> ${platform}</p>
+                <p>${feedbackText}</p>
+            `;
+
+            // Ajout du feedback à la liste
+            feedbackList.appendChild(feedbackItem);
+
+            // Réinitialisation du formulaire
+            feedbackForm.reset();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boutique - AfricoinMarket</title>
+    <link rel="stylesheet" href="css/style.css"> <!-- Lien vers le fichier CSS -->
+</head>
+<body>
+    <header>
+        <nav>
+            <div id="menuToggle">
+                <input type="checkbox" id="menu-checkbox" />
+                <span></span>
+                <span></span>
+                <span></span>
+                <ul id="menu">
+                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="africoin.html">Africoins</a></li>
+                    <li><a href="shop-africoins.html">Acheter AFRICOINS</a></li>
+                    <li><a href="ads.html">Publicités</a></li>
+                    <li><a href="betting.html">Paris</a></li>
+                    <li><a href="conversion.html">Conversion</a></li>
+                    <li><a href="game.html">Jeux</a></li>
+                    <li><a href="stars.html">Stars</a></li>
+                    <li><a href="statistics.html">Statistiques</a></li>
+                    <li><a href="/chatbot">Chatbot</a></li>
+                    <li><a href="investment.html">Investir</a></li>
+                    <li><a href="shop.html">Boutique</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main id="shop">
+        <div id="cart">
+            <h3>Mon Panier</h3>
+            <ul id="cart-items">
+                <!-- Les éléments du panier seront ajoutés ici -->
+            </ul>
+            <p>Total: <span id="total-price">0</span> AFRICOINS</p>
+            
+            <h3>Choisissez un mode de paiement</h3>
+            <label for="currency">Mode de paiement :</label>
+            <select id="currency" onchange="updateTotal()">
+                <option value="usd">Dollars (USD)</option>
+                <option value="crypto">Cryptomonnaie</option>
+                <option value="mobileMoney">Mobile Money</option>
+            </select>
+            
+            <p id="payment-details">Vous paierez en AFRICOINS, basés sur la valeur du dollar, de la cryptomonnaie, ou du Mobile Money.</p>
+            
+            <!-- Formulaire pour Mobile Money -->
+            <div id="mobile-money-details" style="display:none;">
+                <label for="mobileNumber">Numéro de téléphone (ex: Orange Money, M-Pesa) :</label>
+                <input type="text" id="mobileNumber" placeholder="Entrez votre numéro de téléphone">
+            </div>
+            
+            <button onclick="processPayment()">Payer</button>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 AfricoinMarket</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        let totalPrice = 100;  // Exemple de total dans le panier
+        const exchangeRateUSDToAfricoin = 10;  // Exemple de taux de conversion USD -> AFRICOINS
+        const exchangeRateCryptoToAfricoin = 5;  // Exemple de taux de conversion Crypto -> AFRICOINS
+
+        // Modifiez la fonction updateTotal() pour afficher le formulaire Mobile Money
+        function updateTotal() {
+            const currency = document.getElementById('currency').value;
+            const totalElement = document.getElementById('total-price');
+
+            let totalInAfricoin = 0;
+
+            if (currency === 'usd') {
+                totalInAfricoin = totalPrice * exchangeRateUSDToAfricoin;
+            } else if (currency === 'crypto') {
+                totalInAfricoin = totalPrice * exchangeRateCryptoToAfricoin;
+            } else if (currency === 'mobileMoney') {
+                // Montant pour Mobile Money basé sur un taux défini (exemple : 1 Mobile Money = 200 AFRICOINS)
+                totalInAfricoin = totalPrice * 200;
+                // Afficher le formulaire Mobile Money
+                document.getElementById('mobile-money-details').style.display = 'block';
+            }
+
+            totalElement.textContent = totalInAfricoin;
+        }
+
+        // Fonction de traitement du paiement, en fonction du mode choisi
+        function processPayment() {
+            const currency = document.getElementById('currency').value;
+            const totalInAfricoin = parseInt(document.getElementById('total-price').textContent);
+
+            if (currency === 'usd') {
+                alert(`Vous allez payer ${totalInAfricoin} AFRICOINS (équivalent à ${totalInAfricoin / exchangeRateUSDToAfricoin} USD).`);
+            } else if (currency === 'crypto') {
+                alert(`Vous allez payer ${totalInAfricoin} AFRICOINS (équivalent à ${totalInAfricoin / exchangeRateCryptoToAfricoin} Cryptomonnaies).`);
+            } else if (currency === 'mobileMoney') {
+                const mobileNumber = document.getElementById('mobileNumber').value;
+                if (!mobileNumber) {
+                    alert("Veuillez entrer votre numéro de téléphone Mobile Money.");
+                    return;
+                }
+                alert(`Vous allez payer ${totalInAfricoin} AFRICOINS via Mobile Money. Numéro : ${mobileNumber}`);
+            }
+        }
+    </script>
+</body>
+</html>

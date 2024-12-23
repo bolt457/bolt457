@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stars - AfricoinMarket</title>
+
+    <!-- Inclure React et ReactDOM via CDN -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+
+    <!-- Inclure le fichier CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* Styles pour les cartes de stars */
+        .star-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            width: 250px;
+        }
+
+        .star-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .star-card h3 {
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+
+        .star-card .bio {
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .star-card .cote {
+            margin-top: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #3A8DFF;
+        }
+
+        .counter {
+            font-size: 1.2em;
+            color: #ff6347;
+        }
+
+        .star-card video {
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+        #investment-modal .modal-body {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="stars.html">Stars</a></li>
+                <li><a href="statistics.html">Statistiques</a></li>
+                <li><a href="shop.html">Acheter AFRICOINS</a></li>
+                <li><a href="account.html">Mon Compte</a></li>
+                <li><a href="ads.html">Publicités</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Investissez dans les Stars</h2>
+        <div id="root"></div> <!-- Conteneur pour le composant React -->
+    </main>
+
+    <footer>
+        <p>&copy; 2024 AfricoinMarket</p>
+    </footer>
+
+    <!-- Inclure React Components -->
+    <script src="js/StarsComponent.js"></script>
+    <script src="js/star.js" type="module"></script>
+</body>
+</html>
