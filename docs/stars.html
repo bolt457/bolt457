@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stars - AfricoinMarket</title>
 
-    <!-- Inclure React et ReactDOM via CDN -->
     <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
-
-    <!-- Inclure le fichier CSS -->
     <link rel="stylesheet" href="css/style.css">
 
     <style>
@@ -24,45 +21,6 @@
             border-radius: 8px;
             text-align: center;
             width: 250px;
-        }
-
-        .star-card img {
-            width: 100%;
-            height: auto;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .star-card h3 {
-            font-size: 1.2em;
-            margin-top: 10px;
-        }
-
-        .star-card .bio {
-            font-size: 0.9em;
-            color: #555;
-        }
-
-        .star-card .cote {
-            margin-top: 10px;
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #3A8DFF;
-        }
-
-        .counter {
-            font-size: 1.2em;
-            color: #ff6347;
-        }
-
-        .star-card video {
-            width: 100%;
-            margin-top: 10px;
-            border-radius: 5px;
-        }
-
-        #investment-modal .modal-body {
-            text-align: left;
         }
     </style>
 </head>
@@ -82,15 +40,17 @@
 
     <main>
         <h2>Investissez dans les Stars</h2>
-        <div id="root"></div> <!-- Conteneur pour le composant React -->
+        <div id="root"></div>
         <table id="stars-table"></table>
-        <div id="video-preview-container"></div>
+        
         <!-- Formulaire pour ajouter une star -->
         <form id="add-star-form">
-            <input type="text" id="star-name" placeholder="Nom de la star" required />
-            <input type="text" id="star-bio" placeholder="Biographie de la star" required />
-            <input type="file" id="star-image" accept="image/*" />
-            <input type="file" id="star-video" accept="video/*" />
+            <select id="category" required>
+                <option value="actor">Acteur</option>
+                <option value="athlete">Athlète</option>
+                <option value="musician">Musicien</option>
+            </select>
+            <input type="text" id="star-id" placeholder="ID de la star" required />
             <button type="submit">Ajouter Star</button>
         </form>
     </main>
@@ -99,10 +59,124 @@
         <p>&copy; 2024 AfricoinMarket</p>
     </footer>
 
-    <!-- Inclure les composants React -->
     <script src="js/StarsComponent.js" type="module"></script>
-    <!-- Inclure les scripts frontend -->
     <script src="js/frontend.js" type="module"></script>
     <script src="js/star.js" type="module"></script>
+
+    <script>
+        // Token d'autorisation Spotify
+        const spotifyToken = 'BQCN3Cs42747KOZI_-D3uINuxsk91KeatLUiKLqVC-T6irObkP_t6Gto7QfJrB2txrh9lWotstsIb9nuNH0xA6rVj-VM_kbYt5k_PifldoX3YhM5MklbM370ZgmxOHb-DXe6_7GcmoganuFHjAAU9VfH2NfUkZYXmwwZius9Cv69Lbv4MXBjNml0XQzNQGdyEfYSF5hjYW3zjuIaNSNQYTv8YzDTivc28Un0HmNGFdk8GebVHpQS9fp7OJfx_AcFBwQ9wC6pHwurj2JsUFVjWfkMLAVDFcaK';
+        // Token d'autorisation Football-Data
+        const footballToken = '8bd2be175a294d5a95759019187c6ef3';
+
+        async function fetchActorData(starId) {
+            const apiKey = '01c9aa6b29f59a2a302d4ae8a4d0de78'; // Votre clé d'API TMDb
+            const url = `https://api.themoviedb.org/3/person/${starId}?api_key=${apiKey}&language=fr-FR`;
+
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Erreur lors de la récupération des données de l\'acteur.');
+            }
+            return response.json();
+        }
+
+        async function fetchAthleteData(starId) {
+            const url = `https://api.football-data.org/v2/players/${starId}`;
+            const response = await fetch(url, {
+                headers: { 'X-Auth-Token': footballToken }
+            });
+            if (!response.ok) {
+                throw new Error('Erreur lors de la récupération des données de l\'athlète.');
+            }
+            return response.json();
+        }
+
+        async function fetchMusicianData(starId) {
+            const url = `https://api.spotify.com/v1/artists/${starId}`;
+            const response = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${spotifyToken}` }
+            });
+            if (!response.ok) {
+                throw new Error('Erreur lors de la récupération des données du musicien.');
+            }
+            return response.json();
+        }
+
+        async function fetchYouTubeData(videoId) {
+            const apiKey = 'YOUR_YOUTUBE_API_KEY'; // Remplacez par votre clé API YouTube
+            const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet`;
+
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Erreur lors de la récupération des données de YouTube.');
+            }
+            return response.json();
+        }
+
+        async function fetchTikTokData(userId) {
+            const url = `https://api.tiktok.com/user/${userId}`; // Remplacez par l'API TikTok appropriée
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Erreur lors de la récupération des données de TikTok.');
+            }
+            return response.json();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsTable = document.getElementById('stars-table');
+            const stars = [];
+
+            function displayStars() {
+                starsTable.innerHTML = ''; 
+                stars.forEach(star => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${star.name}</td>
+                        <td>${star.bio}</td>
+                        <td><img src="${star.image}" alt="${star.name}" width="100"></td>
+                        <td><button onclick="investInStar('${star.name}')">Investir</button></td>
+                    `;
+                    starsTable.appendChild(row);
+                });
+            }
+
+            document.getElementById('add-star-form').addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                const category = document.getElementById('category').value;
+                const starId = document.getElementById('star-id').value;
+
+                try {
+                    let data;
+
+                    if (category === 'actor') {
+                        data = await fetchActorData(starId);
+                        const name = data.name;
+                        const bio = data.biography || "Aucune biographie disponible";
+                        const imageUrl = data.profile_path ? `https://image.tmdb.org/t/p/w500${data.profile_path}` : "URL par défaut";
+                    } else if (category === 'athlete') {
+                        data = await fetchAthleteData(starId);
+                        const name = data.name || data.fullName;
+                        const bio = data.biography || "Aucune biographie disponible";
+                        const imageUrl = data.photo || "URL par défaut"; // Assurez-vous que ce champ existe
+                    } else if (category === 'musician') {
+                        data = await fetchMusicianData(starId);
+                        const name = data.name;
+                        const bio = data.biography || "Aucune biographie disponible";
+                        const imageUrl = data.images[0]?.url || "URL par défaut"; // Assurez-vous que ce champ existe
+                    }
+
+                    stars.push({ name, bio, image: imageUrl });
+                    displayStars();
+
+                    event.target.reset();
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+
+            displayStars();
+        });
+    </script>
 </body>
 </html>
