@@ -56,6 +56,7 @@
                 <option value="musician">Musicien</option>
             </select>
             <input type="text" id="star-name" placeholder="Nom de la star" required />
+            <input type="number" id="star-value" placeholder="Valeur initiale" required />
             <button type="submit">Ajouter Star</button>
         </form>
 
@@ -72,7 +73,10 @@
         <!-- Conteneurs pour les résultats -->
         <div id="football-results"></div>
         <div id="movie-data"></div>
-        <div id="spotify-tracks"></div>
+        <div id="spotify-tracks">
+            <h3>Morceaux Spotify Populaires</h3>
+            <div id="spotify-tracks-list"></div>
+        </div>
         <div id="youtube-data"></div>
     </main>
 
@@ -80,11 +84,76 @@
         <p>&copy; 2024 AfricoinMarket</p>
     </footer>
 
-    <script src="js/StarsComponent.js" type="module"></script>
-    <script src="js/frontend.js" type="module"></script>
-    <script src="js/star.js" type="module"></script>
-
     <script>
+        const stars = [];
+
+        document.getElementById('add-star-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const category = document.getElementById('category').value;
+            const starName = document.getElementById('star-name').value;
+            const starValue = parseFloat(document.getElementById('star-value').value);
+
+            // Récupérer l'image de l'artiste par API
+            const starImage = await fetchArtistImage(starName);
+
+            const star = {
+                category,
+                name: starName,
+                image: starImage,
+                value: starValue,
+                currentValue: starValue // Valeur actuelle initialisée à la valeur d'entrée
+            };
+
+            stars.push(star);
+            displayStars();
+            this.reset();
+        });
+
+        async function fetchArtistImage(name) {
+            const apiUrl = `https://api.themoviedb.org/3/search/person?api_key=01c9aa6b29f59a2a302d4ae8a4d0de78&query=${encodeURIComponent(name)}`;
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                if (data.results.length > 0) {
+                    return `https://image.tmdb.org/t/p/w500${data.results[0].profile_path}`;
+                } else {
+                    return 'https://via.placeholder.com/250'; // Image par défaut si non trouvée
+                }
+            } catch (error) {
+                console.error('Erreur lors de la récupération de l\'image:', error);
+                return 'https://via.placeholder.com/250'; // Image par défaut en cas d'erreur
+            }
+        }
+
+        function displayStars() {
+            const root = document.getElementById('root');
+            root.innerHTML = ''; // Réinitialiser le contenu
+
+            stars.forEach(star => {
+                const card = document.createElement('div');
+                card.className = 'star-card';
+                card.innerHTML = `
+                    <img src="${star.image}" alt="${star.name}" style="width:100%; height:auto; border-radius:5px;">
+                    <h3>${star.name}</h3>
+                    <p>Categorie: ${star.category}</p>
+                    <p>Valeur: ${star.currentValue} AFRICOINS</p>
+                `;
+                root.appendChild(card);
+            });
+        }
+
+        // Exemple de mise à jour de la valeur d'une star
+        function updateStarValues() {
+            stars.forEach(star => {
+                const change = (Math.random() > 0.5 ? 1 : -1) * Math.random(); // Changement aléatoire
+                star.currentValue += change; // Met à jour la valeur actuelle
+            });
+            displayStars();
+        }
+
+        setInterval(updateStarValues, 5000); // Met à jour les valeurs toutes les 5 secondes
+
         // Football Data API
         const footballApiKey = '8bd2be175a294d5a95759019187c6ef3';
         async function getFootballData() {
@@ -116,12 +185,12 @@
         }
         getMovieData();
 
-        // Spotify API (avec Refresh Token)
+        // Spotify API
         let spotifyToken = null;
         async function refreshSpotifyToken() {
+            const clientId = 'votre-client-id'; // Remplacez par votre Client ID
+            const clientSecret = 'votre-client-secret'; // Remplacez par votre Client Secret
             try {
-                const clientId = 'votre-client-id';
-                const clientSecret = 'votre-client-secret';
                 const response = await fetch('https://accounts.spotify.com/api/token', {
                     method: 'POST',
                     headers: {
@@ -132,7 +201,7 @@
                 });
                 const data = await response.json();
                 spotifyToken = data.access_token;
-                console.log('Nouveau Token Spotify:', spotifyToken);
+                await getSpotifyTracks(); // Obtenir les morceaux après avoir rafraîchi le token
             } catch (error) {
                 console.error('Erreur Spotify Token Refresh:', error);
             }
@@ -145,13 +214,12 @@
                     headers: { 'Authorization': `Bearer ${spotifyToken}` }
                 });
                 const data = await response.json();
-                document.getElementById('spotify-tracks').innerText = 
-                    data.items.map(item => `${item.name} - ${item.artists[0].name}`).join(', ');
+                const tracksList = document.getElementById('spotify-tracks-list');
+                tracksList.innerHTML = data.items.map(item => `<p>${item.name} - ${item.artists[0].name}</p>`).join('');
             } catch (error) {
                 console.error('Erreur Spotify Tracks:', error);
             }
         }
-        getSpotifyTracks();
 
         // YouTube API
         const youtubeApiKey = 'AIzaSyAiNL-4YPv6TTgB0lVi4_Xbr4Y9kX1_C2I';
@@ -167,14 +235,14 @@
             }
         }
         getYouTubeVideos();
-		function refreshAllData() {
-    getFootballData();
-    getMovieData();
-    getSpotifyTracks();
-    getYouTubeVideos();
-}
-setInterval(refreshAllData, 5 * 60 * 1000); // Rafraîchit toutes les 5 minutes
 
+        function refreshAllData() {
+            getFootballData();
+            getMovieData();
+            getSpotifyTracks();
+            getYouTubeVideos();
+        }
+        setInterval(refreshAllData, 5 * 60 * 1000); // Rafraîchit toutes les 5 minutes
     </script>
 </body>
 </html>
