@@ -371,3 +371,26 @@ button:hover {
     color: white;
     transform: scale(1.1);
 }
+#menu {
+    list-style-type: none; /* Supprime les puces */
+    padding: 0; /* Supprime le padding par défaut */
+    margin: 0; /* Supprime la marge par défaut */
+    display: flex; /* Utilise flexbox pour le design */
+    flex-direction: column; /* Affiche les éléments en colonne */
+}
+
+#menu li {
+    margin: 10px 0; /* Ajoute un espace entre les éléments */
+}
+
+#menu a {
+    text-decoration: none; /* Supprime le soulignement des liens */
+    color: #007bff; /* Couleur bleue pour les liens */
+    padding: 10px; /* Ajoute du padding autour des liens */
+    border-radius: 5px; /* Arrondit les coins des liens */
+    transition: background-color 0.3s; /* Ajoute une transition pour le survol */
+}
+
+#menu a:hover {
+    background-color: #f0f0f0; /* Change la couleur de fond au survol */
+}
