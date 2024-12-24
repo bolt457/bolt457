@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boutique - AfricoinMarket</title>
     <link rel="stylesheet" href="css/style.css"> <!-- Lien vers le fichier CSS -->
+    <script src="https://js.stripe.com/v3/"></script> <!-- Inclusion de Stripe.js -->
 </head>
 <body>
     <header>
@@ -46,6 +47,7 @@
                 <option value="usd">Dollars (USD)</option>
                 <option value="crypto">Cryptomonnaie</option>
                 <option value="mobileMoney">Mobile Money</option>
+                <option value="creditCard">Carte de Crédit</option>
             </select>
             
             <p id="payment-details">Vous paierez en AFRICOINS, basés sur la valeur du dollar, de la cryptomonnaie, ou du Mobile Money.</p>
@@ -54,6 +56,13 @@
             <div id="mobile-money-details" style="display:none;">
                 <label for="mobileNumber">Numéro de téléphone (ex: Orange Money, M-Pesa) :</label>
                 <input type="text" id="mobileNumber" placeholder="Entrez votre numéro de téléphone">
+            </div>
+
+            <!-- Formulaire pour Carte de Crédit -->
+            <div id="credit-card-details" style="display:none;">
+                <label for="card-element">Carte de Crédit :</label>
+                <div id="card-element"><!-- Un élément Stripe pour la carte --></div>
+                <div id="card-errors" role="alert"></div>
             </div>
             
             <button onclick="processPayment()">Payer</button>
@@ -66,15 +75,18 @@
 
     <!-- Scripts -->
     <script>
-        let totalPrice = 100;  // Exemple de total dans le panier
-        const exchangeRateUSDToAfricoin = 10;  // Exemple de taux de conversion USD -> AFRICOINS
-        const exchangeRateCryptoToAfricoin = 5;  // Exemple de taux de conversion Crypto -> AFRICOINS
+        const stripe = Stripe('VOTRE_CLE_PUBLIQUE_STRIPE'); // Remplacez par votre clé publique
+        const elements = stripe.elements();
+        const cardElement = elements.create('card');
+        cardElement.mount('#card-element');
 
-        // Modifiez la fonction updateTotal() pour afficher le formulaire Mobile Money
+        let totalPrice = 100;  // Exemple de total dans le panier
+        const exchangeRateUSDToAfricoin = 10;  // Taux de conversion USD -> AFRICOINS
+        const exchangeRateCryptoToAfricoin = 5;  // Taux de conversion Crypto -> AFRICOINS
+
         function updateTotal() {
             const currency = document.getElementById('currency').value;
             const totalElement = document.getElementById('total-price');
-
             let totalInAfricoin = 0;
 
             if (currency === 'usd') {
@@ -82,24 +94,24 @@
             } else if (currency === 'crypto') {
                 totalInAfricoin = totalPrice * exchangeRateCryptoToAfricoin;
             } else if (currency === 'mobileMoney') {
-                // Montant pour Mobile Money basé sur un taux défini (exemple : 1 Mobile Money = 200 AFRICOINS)
                 totalInAfricoin = totalPrice * 200;
-                // Afficher le formulaire Mobile Money
                 document.getElementById('mobile-money-details').style.display = 'block';
+                document.getElementById('credit-card-details').style.display = 'none';
+            } else if (currency === 'creditCard') {
+                totalInAfricoin = totalPrice * exchangeRateUSDToAfricoin; // Utiliser le même taux pour les cartes
+                document.getElementById('credit-card-details').style.display = 'block';
+                document.getElementById('mobile-money-details').style.display = 'none';
             }
 
             totalElement.textContent = totalInAfricoin;
         }
 
-        // Fonction de traitement du paiement, en fonction du mode choisi
-        function processPayment() {
+        async function processPayment() {
             const currency = document.getElementById('currency').value;
-            const totalInAfricoin = parseInt(document.getElementById('total-price').textContent);
+            const totalInAfricoin = parseInt(document.getElementById('total-price').textContent, 10);
 
-            if (currency === 'usd') {
-                alert(`Vous allez payer ${totalInAfricoin} AFRICOINS (équivalent à ${totalInAfricoin / exchangeRateUSDToAfricoin} USD).`);
-            } else if (currency === 'crypto') {
-                alert(`Vous allez payer ${totalInAfricoin} AFRICOINS (équivalent à ${totalInAfricoin / exchangeRateCryptoToAfricoin} Cryptomonnaies).`);
+            if (currency === 'usd' || currency === 'crypto') {
+                alert(`Vous allez payer ${totalInAfricoin} AFRICOINS.`);
             } else if (currency === 'mobileMoney') {
                 const mobileNumber = document.getElementById('mobileNumber').value;
                 if (!mobileNumber) {
@@ -107,6 +119,20 @@
                     return;
                 }
                 alert(`Vous allez payer ${totalInAfricoin} AFRICOINS via Mobile Money. Numéro : ${mobileNumber}`);
+            } else if (currency === 'creditCard') {
+                const {error, paymentMethod} = await stripe.createPaymentMethod({
+                    type: 'card',
+                    card: cardElement,
+                });
+
+                if (error) {
+                    // Afficher l'erreur dans #card-errors
+                    document.getElementById('card-errors').textContent = error.message;
+                } else {
+                    // Envoyer paymentMethod.id à votre serveur pour traiter le paiement
+                    alert(`Vous allez payer ${totalInAfricoin} AFRICOINS avec la carte de crédit.`);
+                    // Ici, vous devez appeler votre serveur pour traiter le paiement avec le paymentMethod.id
+                }
             }
         }
     </script>

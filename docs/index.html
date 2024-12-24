@@ -3,12 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AfricoinMarket - Investissez dans les stars et les cryptomonnaies.">
     <title>Accueil - AfricoinMarket</title>
     <link rel="stylesheet" href="css/style.css"> <!-- Lien vers le fichier CSS -->
-    <script type="module" src="./js/indexeddb.js"></script>
-    <script type="module" src="./js/import.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
 </head>
 <body>
+    <div id="qrcode"></div>
+    <script>
+        $(document).ready(function() {
+            $('#qrcode').qrcode({
+                text: 'https://votre-url-de-lapplication.com'
+            });
+        });
+    </script>
+
     <header>
         <nav>
             <div id="menuToggle">
@@ -71,6 +82,8 @@
         <p>&copy; 2024 AfricoinMarket</p>
     </footer>
 
+    <script type="module" src="js/indexeddb.js"></script>
+    <script type="module" src="js/import.js"></script>
     <script type="module" src="wallet.js"></script> <!-- Lien vers votre fichier JavaScript wallet.js -->
 </body>
 </html>
