@@ -80,20 +80,29 @@
         </nav>
     </header>
 
-     <main>
+    <main>
         <h2>Investissez dans les Stars</h2>
         <div id="root"></div> <!-- Conteneur pour le composant React -->
         <table id="stars-table"></table>
         <div id="video-preview-container"></div>
+        <!-- Formulaire pour ajouter une star -->
+        <form id="add-star-form">
+            <input type="text" id="star-name" placeholder="Nom de la star" required />
+            <input type="text" id="star-bio" placeholder="Biographie de la star" required />
+            <input type="file" id="star-image" accept="image/*" />
+            <input type="file" id="star-video" accept="video/*" />
+            <button type="submit">Ajouter Star</button>
+        </form>
     </main>
 
     <footer>
         <p>&copy; 2024 AfricoinMarket</p>
     </footer>
 
-    <!-- Inclure React Components -->
-    <script src="js/StarsComponent.js"></script>
-    <!-- Inclure le script frontend -->
-    <script src="js/frontend.js"></script><script src="js/star.js" type="module"></script>
+    <!-- Inclure les composants React -->
+    <script src="js/StarsComponent.js" type="module"></script>
+    <!-- Inclure les scripts frontend -->
+    <script src="js/frontend.js" type="module"></script>
+    <script src="js/star.js" type="module"></script>
 </body>
 </html>
