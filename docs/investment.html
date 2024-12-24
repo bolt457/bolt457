@@ -129,7 +129,61 @@
 
     <script>
         const apiKey = 'I581L0C55PZAI8AG'; // Votre clé API Alpha Vantage
+        let db;
 
+        window.onload = function() {
+            const username = getCookie("username");
+            if (username) {
+                console.log(`Bienvenue, ${username}`);
+            } else {
+                console.log("Utilisateur non connecté.");
+            }
+
+            initDatabase(); // Initialiser la base de données
+            loadSpeculationHistory(); // Charger l'historique des spéculations
+        };
+
+        // Initialiser IndexedDB
+        function initDatabase() {
+            const request = indexedDB.open('InvestmentDB', 1);
+
+            request.onupgradeneeded = function(event) {
+                db = event.target.result;
+                db.createObjectStore('speculations', { keyPath: 'id', autoIncrement: true });
+            };
+
+            request.onsuccess = function(event) {
+                db = event.target.result;
+            };
+        }
+
+        // Charger l'historique des spéculations
+        function loadSpeculationHistory() {
+            const transaction = db.transaction(['speculations'], 'readonly');
+            const store = transaction.objectStore('speculations');
+            const request = store.getAll();
+
+            request.onsuccess = function(event) {
+                const results = event.target.result;
+                const tableBody = document.querySelector('#speculationTable tbody');
+                tableBody.innerHTML = ''; // Réinitialiser le tableau
+
+                results.forEach(speculation => {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td>${speculation.companySymbol}</td>
+                        <td>${speculation.speculationType === 'up' ? 'Augmentation' : 'Baisse'}</td>
+                        <td>${speculation.amount.toFixed(2)} Africoins</td>
+                        <td>${speculation.timeframe} jours</td>
+                        <td>${speculation.result}</td>
+                        <td>${speculation.potentialGain.toFixed(2)} Africoins</td>
+                    `;
+                    tableBody.appendChild(newRow);
+                });
+            };
+        }
+
+        // Gestion du formulaire
         document.getElementById('speculationForm').addEventListener('submit', async function(event) {
             event.preventDefault();
 
@@ -183,7 +237,7 @@
                     alert(`Tendance significative détectée : ${endPrice > startPrice ? 'Augmentation' : 'Baisse'} de ${Math.abs(((endPrice - startPrice) / startPrice * 100).toFixed(2))}%`);
                 }
 
-                // Ajouter les données au tableau
+                // Ajouter les données au tableau et à IndexedDB
                 const tableBody = document.querySelector('#speculationTable tbody');
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
@@ -196,6 +250,9 @@
                 `;
                 tableBody.appendChild(newRow);
 
+                // Enregistrer la spéculation dans IndexedDB
+                saveSpeculation({ companySymbol, speculationType, amount, timeframe, result, potentialGain });
+
                 // Réinitialiser le formulaire
                 document.getElementById('speculationForm').reset();
             } catch (error) {
@@ -204,15 +261,20 @@
             }
         });
 
-        // Récupérer le cookie lors du chargement de la page
-        window.onload = function() {
-            const username = getCookie("username");
-            if (username) {
-                console.log(`Bienvenue, ${username}`); // Affiche 'Bienvenue, JohnDoe'
-            } else {
-                console.log("Utilisateur non connecté.");
-            }
-        };
+        // Enregistrer la spéculation dans IndexedDB
+        function saveSpeculation(speculation) {
+            const transaction = db.transaction(['speculations'], 'readwrite');
+            const store = transaction.objectStore('speculations');
+            store.add(speculation);
+        }
+
+        // Fonction pour récupérer un cookie
+        function getCookie(name) {
+            return document.cookie.split('; ').reduce((acc, cookie) => {
+                const [key, val] = cookie.split('=');
+                return key === name ? decodeURIComponent(val) : acc;
+            }, null);
+        }
     </script>
 </body>
 </html>

@@ -69,6 +69,57 @@
     <script src="/js/wallet.js"></script>
 
     <script>
+        // Initialisation de la base de données
+        let db;
+        const DB_NAME = 'AfricoinDB';
+        const STORE_NAME = 'africoins';
+
+        // Ouvrir la base de données
+        function initDatabase() {
+            const request = indexedDB.open(DB_NAME, 1);
+
+            request.onupgradeneeded = function(event) {
+                db = event.target.result;
+                db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+            };
+
+            request.onsuccess = function(event) {
+                db = event.target.result;
+                loadAccountData();
+            };
+        }
+
+        // Charger les données du compte
+        function loadAccountData() {
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get(1); // ID 1 pour les informations du compte
+
+            request.onsuccess = function() {
+                const result = request.result;
+                if (result) {
+                    document.getElementById('balance-display').textContent = result.balance || 0;
+                    document.getElementById('products-purchased').textContent = result.productsPurchased || 0;
+                    document.getElementById('total-value').textContent = result.totalValue || 0;
+                }
+            };
+        }
+
+        // Mettre à jour le solde des Africoins
+        function updateAccountData(balanceChange, productsPurchasedChange, totalValueChange) {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get(1); // ID 1 pour les informations du compte
+
+            request.onsuccess = function(event) {
+                const result = event.target.result || { id: 1, balance: 0, productsPurchased: 0, totalValue: 0 };
+                result.balance += balanceChange;
+                result.productsPurchased += productsPurchasedChange;
+                result.totalValue += totalValueChange;
+                store.put(result);
+            };
+        }
+
         // Fonction pour afficher le nom d'utilisateur
         function displayUsername() {
             const username = getCookie("username");
@@ -81,6 +132,7 @@
 
         // Appel des fonctions au chargement de la page
         displayUsername(); // Affiche le nom d'utilisateur
+        initDatabase(); // Initialise la base de données
 
         // Fonction de déconnexion
         document.getElementById('logout-button').addEventListener('click', function () {
@@ -89,8 +141,6 @@
             window.location.href = '/'; // Redirection vers la page d'accueil
         });
 
-        // Données d'exemple pour les stars et investissements...
-        // ... (les autres fonctions et données restent inchangées)
     </script>
 </body>
 

@@ -88,6 +88,44 @@
         let stars = [];
         let investments = [];
 
+        // Initialisation de IndexedDB
+        const dbName = "AfricoinMarketDB";
+        const storeName = "Investments";
+        let db;
+
+        const request = indexedDB.open(dbName, 1);
+
+        request.onupgradeneeded = function(event) {
+            db = event.target.result;
+            const objectStore = db.createObjectStore(storeName, { keyPath: "id", autoIncrement: true });
+            objectStore.createIndex("star", "star", { unique: false });
+            objectStore.createIndex("amount", "amount", { unique: false });
+            objectStore.createIndex("duration", "duration", { unique: false });
+        };
+
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            console.log("Base de données ouverte avec succès !");
+        };
+
+        request.onerror = function(event) {
+            console.error("Erreur d'ouverture de la base de données :", event.target.error);
+        };
+
+        // Fonction pour ajouter un investissement à IndexedDB
+        function addInvestment(star, amount, duration) {
+            const transaction = db.transaction([storeName], "readwrite");
+            const objectStore = transaction.objectStore(storeName);
+            const investment = { star, amount, duration };
+            objectStore.add(investment);
+            transaction.oncomplete = function() {
+                console.log("Investissement ajouté avec succès !");
+            };
+            transaction.onerror = function(event) {
+                console.error("Erreur lors de l'ajout de l'investissement :", event.target.error);
+            };
+        }
+
         async function fetchActorByName(name) {
             const apiKey = tmdbApiKey;
             const url = `https://api.themoviedb.org/3/search/person?api_key=${apiKey}&query=${encodeURIComponent(name)}&language=fr-FR`;
@@ -220,6 +258,7 @@
                     duration: investmentDuration,
                     initialRating: star.rating
                 });
+                addInvestment(starName, investmentAmount, investmentDuration); // Ajout à IndexedDB
                 alert(`Vous avez investi ${investmentAmount} Africoins dans ${starName} pour une durée de ${investmentDuration}.`);
 
                 setTimeout(() => {

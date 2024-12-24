@@ -9,6 +9,43 @@
     <script>
         let exchangeRateUsdToAfricoin = 1; // 1 USD = 1 AFRICOIN (référence)
 
+        // Initialisation de IndexedDB
+        const dbName = "AfricoinMarketDB";
+        const storeName = "Purchases";
+        let db;
+
+        const request = indexedDB.open(dbName, 1);
+
+        request.onupgradeneeded = function (event) {
+            db = event.target.result;
+            const objectStore = db.createObjectStore(storeName, { keyPath: "id", autoIncrement: true });
+            objectStore.createIndex("amount", "amount", { unique: false });
+            objectStore.createIndex("method", "method", { unique: false });
+        };
+
+        request.onsuccess = function (event) {
+            db = event.target.result;
+            console.log("Base de données ouverte avec succès !");
+        };
+
+        request.onerror = function (event) {
+            console.error("Erreur d'ouverture de la base de données :", event.target.error);
+        };
+
+        // Fonction pour ajouter un achat à IndexedDB
+        function addPurchase(amount, method) {
+            const transaction = db.transaction([storeName], "readwrite");
+            const objectStore = transaction.objectStore(storeName);
+            const purchase = { amount, method, date: new Date() };
+            objectStore.add(purchase);
+            transaction.oncomplete = function () {
+                console.log("Achat ajouté avec succès !");
+            };
+            transaction.onerror = function (event) {
+                console.error("Erreur lors de l'ajout de l'achat :", event.target.error);
+            };
+        }
+
         // Fonction pour afficher le formulaire de paiement selon la méthode choisie
         function displayPaymentForm(method) {
             const formContainer = document.getElementById('payment-form-container');
@@ -107,6 +144,7 @@
             }
 
             if (isValid) {
+                addPurchase(africoinAmount, method); // Ajout de l'achat à IndexedDB
                 alert(`Votre achat de ${africoinAmount} Africoins avec ${method} a été validé.`);
             }
         }

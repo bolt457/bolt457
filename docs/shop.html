@@ -83,7 +83,36 @@
         let totalPrice = 100;  // Exemple de total dans le panier
         const exchangeRateUSDToAfricoin = 10;  // Taux de conversion USD -> AFRICOINS
         const exchangeRateCryptoToAfricoin = 5;  // Taux de conversion Crypto -> AFRICOINS
+        let totalAfricoins = 0; // Total Africoins disponibles
 
+        // Initialisation de la base de données
+        function initDatabase() {
+            const request = indexedDB.open('AfricoinDB', 1);
+
+            request.onupgradeneeded = function(event) {
+                const db = event.target.result;
+                db.createObjectStore('africoins', { keyPath: 'id' });
+            };
+
+            request.onsuccess = function(event) {
+                const db = event.target.result;
+                loadTotalAfricoins(db);
+            };
+        }
+
+        // Charger le total des Africoins
+        function loadTotalAfricoins(db) {
+            const transaction = db.transaction(['africoins'], 'readonly');
+            const store = transaction.objectStore('africoins');
+            const request = store.get(1); // ID 1 pour le total
+
+            request.onsuccess = function() {
+                totalAfricoins = request.result ? request.result.amount : 0;
+                updateTotal();
+            };
+        }
+
+        // Mettre à jour le total affiché
         function updateTotal() {
             const currency = document.getElementById('currency').value;
             const totalElement = document.getElementById('total-price');
@@ -98,7 +127,7 @@
                 document.getElementById('mobile-money-details').style.display = 'block';
                 document.getElementById('credit-card-details').style.display = 'none';
             } else if (currency === 'creditCard') {
-                totalInAfricoin = totalPrice * exchangeRateUSDToAfricoin; // Utiliser le même taux pour les cartes
+                totalInAfricoin = totalPrice * exchangeRateUSDToAfricoin;
                 document.getElementById('credit-card-details').style.display = 'block';
                 document.getElementById('mobile-money-details').style.display = 'none';
             }
@@ -112,6 +141,7 @@
 
             if (currency === 'usd' || currency === 'crypto') {
                 alert(`Vous allez payer ${totalInAfricoin} AFRICOINS.`);
+                updateTotalAfricoins(-totalInAfricoin); // Déduire des Africoins
             } else if (currency === 'mobileMoney') {
                 const mobileNumber = document.getElementById('mobileNumber').value;
                 if (!mobileNumber) {
@@ -119,6 +149,7 @@
                     return;
                 }
                 alert(`Vous allez payer ${totalInAfricoin} AFRICOINS via Mobile Money. Numéro : ${mobileNumber}`);
+                updateTotalAfricoins(-totalInAfricoin); // Déduire des Africoins
             } else if (currency === 'creditCard') {
                 const {error, paymentMethod} = await stripe.createPaymentMethod({
                     type: 'card',
@@ -126,15 +157,31 @@
                 });
 
                 if (error) {
-                    // Afficher l'erreur dans #card-errors
                     document.getElementById('card-errors').textContent = error.message;
                 } else {
-                    // Envoyer paymentMethod.id à votre serveur pour traiter le paiement
                     alert(`Vous allez payer ${totalInAfricoin} AFRICOINS avec la carte de crédit.`);
-                    // Ici, vous devez appeler votre serveur pour traiter le paiement avec le paymentMethod.id
+                    updateTotalAfricoins(-totalInAfricoin); // Déduire des Africoins
                 }
             }
         }
+
+        // Mettre à jour le total des Africoins dans IndexedDB
+        function updateTotalAfricoins(amount) {
+            const request = indexedDB.open('AfricoinDB', 1);
+            request.onsuccess = function(event) {
+                const db = event.target.result;
+                const transaction = db.transaction(['africoins'], 'readwrite');
+                const store = transaction.objectStore('africoins');
+                store.get(1).onsuccess = function(event) {
+                    const record = event.target.result;
+                    const newAmount = (record ? record.amount : 0) + amount;
+                    store.put({ id: 1, amount: newAmount });
+                };
+            };
+        }
+
+        // Initialiser la base de données au chargement
+        initDatabase();
     </script>
 </body>
 </html>

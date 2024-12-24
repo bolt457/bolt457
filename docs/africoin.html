@@ -8,6 +8,7 @@
     <script src="js/africoin.js" defer></script> <!-- Fichier JavaScript -->
     <script>
         const PASSWORD = "W3S4RwzXmLyK29C33(@"; // Changez ceci
+        let db;
 
         window.onload = function() {
             const username = getCookie("username");
@@ -19,9 +20,10 @@
                 console.log("Utilisateur non connecté.");
             }
 
-            // Vérifiez si le mot de passe a déjà été confirmé
             if (!passwordConfirmed) {
                 checkPassword();
+            } else {
+                initDatabase(); // Initialiser la base de données si le mot de passe est confirmé
             }
         };
 
@@ -29,11 +31,89 @@
             const userPassword = prompt("Veuillez entrer le mot de passe pour accéder à cette page :");
             if (userPassword === PASSWORD) {
                 setCookie("passwordConfirmed", "true", 7); // Stocke la confirmation du mot de passe
+                initDatabase(); // Initialiser la base de données
             } else {
                 alert("Mot de passe incorrect !");
                 window.location.href = "index.html"; // Redirige vers la page d'accueil
             }
         }
+
+        // Fonction pour initialiser IndexedDB
+        function initDatabase() {
+            const request = indexedDB.open('AfricoinDB', 1);
+
+            request.onupgradeneeded = function(event) {
+                db = event.target.result;
+                const store = db.createObjectStore('africoins', { keyPath: 'id' });
+                store.createIndex('balance', 'balance', { unique: false });
+            };
+
+            request.onsuccess = function(event) {
+                db = event.target.result;
+                loadAccountData(); // Charger les données du compte
+            };
+        }
+
+        // Charger les données du compte
+        function loadAccountData() {
+            const transaction = db.transaction(['africoins'], 'readonly');
+            const store = transaction.objectStore('africoins');
+            const request = store.get(1); // ID 1 pour les informations
+
+            request.onsuccess = function() {
+                const result = request.result;
+                if (result) {
+                    document.getElementById('wallet-balance').textContent = result.balance || 0;
+                    document.getElementById('totalAfricoins').textContent = result.total || 0;
+                }
+            };
+        }
+
+        // Enregistrer ou mettre à jour les données de compte
+        function updateAccountData(balanceChange, totalChange) {
+            const transaction = db.transaction(['africoins'], 'readwrite');
+            const store = transaction.objectStore('africoins');
+            const request = store.get(1); // ID 1 pour les informations
+
+            request.onsuccess = function(event) {
+                const result = event.target.result || { id: 1, balance: 0, total: 0 };
+                result.balance += balanceChange;
+                result.total += totalChange;
+                store.put(result);
+            };
+        }
+
+        // Gestion des formulaires
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('emissionForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const amount = parseInt(document.getElementById('amount').value);
+                updateAccountData(amount, amount); // Émettre des Africoins
+                document.getElementById('emissionResult').textContent = `Émis : ${amount} Africoins`;
+                loadAccountData();
+            });
+
+            document.getElementById('deposit-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const depositAmount = parseInt(document.getElementById('deposit-amount').value);
+                updateAccountData(depositAmount, 0); // Déposer des Africoins
+                document.getElementById('deposit-message').textContent = `Déposé : ${depositAmount} Africoins`;
+                loadAccountData();
+            });
+
+            document.getElementById('withdraw-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const withdrawAmount = parseInt(document.getElementById('withdraw-amount').value);
+                const currentBalance = parseInt(document.getElementById('wallet-balance').textContent);
+                if (withdrawAmount <= currentBalance) {
+                    updateAccountData(-withdrawAmount, 0); // Retirer des Africoins
+                    document.getElementById('withdraw-message').textContent = `Retiré : ${withdrawAmount} Africoins`;
+                } else {
+                    document.getElementById('withdraw-message').textContent = `Solde insuffisant pour retirer ${withdrawAmount} Africoins.`;
+                }
+                loadAccountData();
+            });
+        });
 
         function setCookie(name, value, days) {
             const expires = new Date(Date.now() + days * 864e5).toUTCString();
@@ -77,13 +157,10 @@
     <footer>
         <section id="bank">
             <h2>Gestion de votre Banque</h2>
-
-            <!-- Afficher le solde -->
             <div id="wallet-info">
                 <p>Solde actuel : <span id="wallet-balance">0</span> Africoins</p>
             </div>
 
-            <!-- Formulaire pour déposer des Africoins -->
             <div>
                 <h3>Déposer des Africoins</h3>
                 <form id="deposit-form">
@@ -93,7 +170,6 @@
                 <p id="deposit-message"></p>
             </div>
 
-            <!-- Formulaire pour retirer des Africoins -->
             <div>
                 <h3>Retirer des Africoins</h3>
                 <form id="withdraw-form">
