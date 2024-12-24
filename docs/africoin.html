@@ -7,28 +7,44 @@
     <link rel="stylesheet" href="css/style.css"> <!-- Utilisation des styles globaux existants -->
     <script src="js/africoin.js" defer></script> <!-- Fichier JavaScript -->
     <script>
-        // Mot de passe à définir
         const PASSWORD = "W3S4RwzXmLyK29C33(@"; // Changez ceci
 
-        // Fonction pour vérifier le mot de passe et récupérer le cookie lors du chargement de la page
         window.onload = function() {
             const username = getCookie("username");
+            const passwordConfirmed = getCookie("passwordConfirmed");
+
             if (username) {
-                console.log(`Bienvenue, ${username}`); // Affiche 'Bienvenue, JohnDoe'
+                console.log(`Bienvenue, ${username}`);
             } else {
                 console.log("Utilisateur non connecté.");
             }
 
-            checkPassword();
+            // Vérifiez si le mot de passe a déjà été confirmé
+            if (!passwordConfirmed) {
+                checkPassword();
+            }
         };
 
-        // Fonction pour demander le mot de passe
         function checkPassword() {
             const userPassword = prompt("Veuillez entrer le mot de passe pour accéder à cette page :");
-            if (userPassword !== PASSWORD) {
+            if (userPassword === PASSWORD) {
+                setCookie("passwordConfirmed", "true", 7); // Stocke la confirmation du mot de passe
+            } else {
                 alert("Mot de passe incorrect !");
                 window.location.href = "index.html"; // Redirige vers la page d'accueil
             }
+        }
+
+        function setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+        }
+
+        function getCookie(name) {
+            return document.cookie.split('; ').reduce((acc, cookie) => {
+                const [key, val] = cookie.split('=');
+                return key === name ? decodeURIComponent(val) : acc;
+            }, null);
         }
     </script>
 </head>
