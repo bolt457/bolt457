@@ -68,6 +68,12 @@
             <a href="https://www.youtube.com/" target="_blank">YouTube</a>
             <a href="https://www.tiktok.com/" target="_blank">TikTok</a>
         </div>
+
+        <!-- Conteneurs pour les résultats -->
+        <div id="football-results"></div>
+        <div id="movie-data"></div>
+        <div id="spotify-tracks"></div>
+        <div id="youtube-data"></div>
     </main>
 
     <footer>
@@ -79,213 +85,96 @@
     <script src="js/star.js" type="module"></script>
 
     <script>
-        // Clés d'autorisation (ne pas exposer en production)
-        const spotifyToken = 'YOUR_SPOTIFY_TOKEN';
-        const footballToken = 'YOUR_FOOTBALL_DATA_TOKEN';
-        const tmdbApiKey = 'YOUR_TMDB_API_KEY';
-        const youtubeApiKey = 'YOUR_YOUTUBE_API_KEY';
-
-        let stars = [];
-        let investments = [];
-
-        // Initialisation de IndexedDB
-        const dbName = "AfricoinMarketDB";
-        const storeName = "Investments";
-        let db;
-
-        const request = indexedDB.open(dbName, 1);
-
-        request.onupgradeneeded = function(event) {
-            db = event.target.result;
-            const objectStore = db.createObjectStore(storeName, { keyPath: "id", autoIncrement: true });
-            objectStore.createIndex("star", "star", { unique: false });
-            objectStore.createIndex("amount", "amount", { unique: false });
-            objectStore.createIndex("duration", "duration", { unique: false });
-        };
-
-        request.onsuccess = function(event) {
-            db = event.target.result;
-            console.log("Base de données ouverte avec succès !");
-        };
-
-        request.onerror = function(event) {
-            console.error("Erreur d'ouverture de la base de données :", event.target.error);
-        };
-
-        // Fonction pour ajouter un investissement à IndexedDB
-        function addInvestment(star, amount, duration) {
-            const transaction = db.transaction([storeName], "readwrite");
-            const objectStore = transaction.objectStore(storeName);
-            const investment = { star, amount, duration };
-            objectStore.add(investment);
-            transaction.oncomplete = function() {
-                console.log("Investissement ajouté avec succès !");
-            };
-            transaction.onerror = function(event) {
-                console.error("Erreur lors de l'ajout de l'investissement :", event.target.error);
-            };
-        }
-
-        async function fetchActorByName(name) {
-            const apiKey = tmdbApiKey;
-            const url = `https://api.themoviedb.org/3/search/person?api_key=${apiKey}&query=${encodeURIComponent(name)}&language=fr-FR`;
-
-            const response = await fetch(url);
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Erreur lors de la récupération des données de l'acteur : ${errorData.status_message}`);
-            }
-            return response.json();
-        }
-
-        async function fetchMusicianByName(name) {
-            const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(name)}&type=artist`;
-            const response = await fetch(url, {
-                headers: { 'Authorization': `Bearer ${spotifyToken}` }
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Erreur lors de la récupération des données du musicien : ${errorData.error.message}`);
-            }
-            return response.json();
-        }
-
-        async function fetchYouTubeVideos(query) {
-            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${youtubeApiKey}&maxResults=5`;
-            const response = await fetch(url);
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Erreur lors de la récupération des vidéos YouTube : ${errorData.error.message}`);
-            }
-            return response.json();
-        }
-
-        function simulateRatingChange() {
-            stars.forEach(star => {
-                star.rating += Math.floor(Math.random() * 3) - 1; // Variation aléatoire de -1 à 1
-                if (star.rating < 0) star.rating = 0; // Assurez-vous que la cote ne soit pas négative
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const starsTable = document.getElementById('stars-table');
-
-            function displayStars() {
-                starsTable.innerHTML = ''; 
-                stars.forEach(star => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${star.name}</td>
-                        <td><img src="${star.image}" alt="${star.name}" width="100"></td>
-                        <td>${star.rating}</td>
-                        <td>
-                            <input type="number" placeholder="Africoins" min="1" id="investment-${star.name}" />
-                            <select id="duration-${star.name}">
-                                <option value="1 semaine">1 Semaine</option>
-                                <option value="1 mois">1 Mois</option>
-                                <option value="3 mois">3 Mois</option>
-                                <option value="6 mois">6 Mois</option>
-                            </select>
-                            <button onclick="investInStar('${star.name}')">Investir</button>
-                        </td>
-                    `;
-                    starsTable.appendChild(row);
+        // Football Data API
+        const footballApiKey = '8bd2be175a294d5a95759019187c6ef3';
+        async function getFootballData() {
+            try {
+                const response = await fetch('https://api.football-data.org/v2/matches', {
+                    headers: { 'X-Auth-Token': footballApiKey }
                 });
+                const data = await response.json();
+                document.getElementById('football-results').innerText = 
+                    `Matchs aujourd'hui : ${data.matches.length}`;
+            } catch (error) {
+                console.error('Erreur Football Data:', error);
             }
+        }
+        getFootballData();
 
-            document.getElementById('add-star-form').addEventListener('submit', async function(event) {
-                event.preventDefault();
-                
-                const category = document.getElementById('category').value;
-                const starName = document.getElementById('star-name').value.trim();
+        // TMDB (The Movie Database) API
+        const tmdbApiKey = '01c9aa6b29f59a2a302d4ae8a4d0de78';
+        async function getMovieData() {
+            try {
+                const response = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${tmdbApiKey}`);
+                const data = await response.json();
+                const firstMovie = data.results[0];
+                document.getElementById('movie-data').innerText = 
+                    `Film Populaire : ${firstMovie.title}`;
+            } catch (error) {
+                console.error('Erreur TMDB:', error);
+            }
+        }
+        getMovieData();
 
-                if (!starName) {
-                    alert("Veuillez entrer un nom valide.");
-                    return;
-                }
-
-                try {
-                    let data;
-                    let name, imageUrl, rating;
-
-                    if (category === 'actor') {
-                        data = await fetchActorByName(starName);
-                        if (data.results.length > 0) {
-                            name = data.results[0].name;
-                            imageUrl = data.results[0].profile_path ? `https://image.tmdb.org/t/p/w500${data.results[0].profile_path}` : "URL par défaut";
-                            rating = Math.floor(Math.random() * 10); // Cote initiale aléatoire
-                        } else {
-                            throw new Error("Aucun acteur trouvé avec ce nom.");
-                        }
-                    } else if (category === 'musician') {
-                        data = await fetchMusicianByName(starName);
-                        if (data.artists.items.length > 0) {
-                            name = data.artists.items[0].name;
-                            imageUrl = data.artists.items[0].images[0]?.url || "URL par défaut";
-                            rating = Math.floor(Math.random() * 10); // Cote initiale aléatoire
-                        } else {
-                            throw new Error("Aucun musicien trouvé avec ce nom.");
-                        }
-                    }
-
-                    // Fetch YouTube videos related to the star
-                    const youtubeData = await fetchYouTubeVideos(name);
-                    console.log(youtubeData); // Afficher les vidéos dans la console
-
-                    stars.push({ name, image: imageUrl, rating });
-                    displayStars();
-
-                    event.target.reset();
-                } catch (error) {
-                    alert(error.message);
-                }
-            });
-
-            displayStars();
-        });
-
-        function investInStar(starName) {
-            const investmentInput = document.getElementById(`investment-${starName}`);
-            const durationSelect = document.getElementById(`duration-${starName}`);
-            const investmentAmount = investmentInput.value;
-            const investmentDuration = durationSelect.value;
-
-            if (investmentAmount && investmentAmount > 0) {
-                const star = stars.find(s => s.name === starName);
-                investments.push({
-                    star: starName,
-                    amount: investmentAmount,
-                    duration: investmentDuration,
-                    initialRating: star.rating
+        // Spotify API (avec Refresh Token)
+        let spotifyToken = null;
+        async function refreshSpotifyToken() {
+            try {
+                const clientId = 'votre-client-id';
+                const clientSecret = 'votre-client-secret';
+                const response = await fetch('https://accounts.spotify.com/api/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
+                    },
+                    body: 'grant_type=client_credentials'
                 });
-                addInvestment(starName, investmentAmount, investmentDuration); // Ajout à IndexedDB
-                alert(`Vous avez investi ${investmentAmount} Africoins dans ${starName} pour une durée de ${investmentDuration}.`);
-
-                setTimeout(() => {
-                    simulateRatingChange();
-                    const updatedStar = stars.find(s => s.name === starName);
-                    const gains = (updatedStar.rating / star.rating) * investmentAmount - investmentAmount;
-
-                    if (gains > 0) {
-                        alert(`Gains réalisés : ${gains.toFixed(2)} Africoins.`);
-                    } else {
-                        alert(`Vous avez perdu : ${Math.abs(gains).toFixed(2)} Africoins.`);
-                    }
-                }, 5000); // Changer cela pour simuler un délai réel
-            } else {
-                alert("Veuillez entrer un montant valide d'Africoins.");
+                const data = await response.json();
+                spotifyToken = data.access_token;
+                console.log('Nouveau Token Spotify:', spotifyToken);
+            } catch (error) {
+                console.error('Erreur Spotify Token Refresh:', error);
             }
         }
 
-        // Récupérer le cookie lors du chargement de la page
-        window.onload = function() {
-            const username = getCookie("username");
-            if (username) {
-                console.log(`Bienvenue, ${username}`); // Affiche 'Bienvenue, JohnDoe'
-            } else {
-                console.log("Utilisateur non connecté.");
+        async function getSpotifyTracks() {
+            if (!spotifyToken) await refreshSpotifyToken();
+            try {
+                const response = await fetch('https://api.spotify.com/v1/me/top/tracks?limit=5', {
+                    headers: { 'Authorization': `Bearer ${spotifyToken}` }
+                });
+                const data = await response.json();
+                document.getElementById('spotify-tracks').innerText = 
+                    data.items.map(item => `${item.name} - ${item.artists[0].name}`).join(', ');
+            } catch (error) {
+                console.error('Erreur Spotify Tracks:', error);
             }
-        };
+        }
+        getSpotifyTracks();
+
+        // YouTube API
+        const youtubeApiKey = 'AIzaSyAiNL-4YPv6TTgB0lVi4_Xbr4Y9kX1_C2I';
+        async function getYouTubeVideos() {
+            try {
+                const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&chart=mostPopular&key=${youtubeApiKey}`);
+                const data = await response.json();
+                const firstVideo = data.items[0];
+                document.getElementById('youtube-data').innerText = 
+                    `Vidéo populaire : ${firstVideo.snippet.title}`;
+            } catch (error) {
+                console.error('Erreur YouTube:', error);
+            }
+        }
+        getYouTubeVideos();
+		function refreshAllData() {
+    getFootballData();
+    getMovieData();
+    getSpotifyTracks();
+    getYouTubeVideos();
+}
+setInterval(refreshAllData, 5 * 60 * 1000); // Rafraîchit toutes les 5 minutes
+
     </script>
 </body>
 </html>
