@@ -47,18 +47,35 @@
         <h2>Investissez dans les Stars</h2>
         <div id="root"></div>
         <table id="stars-table"></table>
-        
+
         <!-- Formulaire pour ajouter une star -->
         <form id="add-star-form">
+            <label for="access-code">Code d'accès :</label>
+            <input type="text" id="access-code" placeholder="Entrez le code d'accès" required />
+
             <select id="category" required>
                 <option value="actor">Acteur</option>
                 <option value="athlete">Athlète</option>
                 <option value="musician">Musicien</option>
             </select>
             <input type="text" id="star-name" placeholder="Nom de la star" required />
-            <input type="number" id="star-value" placeholder="Valeur initiale" required />
             <button type="submit">Ajouter Star</button>
         </form>
+
+        <!-- Formulaire pour parier -->
+        <form id="bet-form">
+            <select id="bet-artist" required>
+                <option value="">Choisissez une star</option>
+            </select>
+            <select id="bet-direction" required>
+                <option value="up">Parier sur la hausse</option>
+                <option value="down">Parier sur la baisse</option>
+            </select>
+            <input type="number" id="bet-amount" placeholder="Montant à parier" required />
+            <input type="number" id="bet-period" placeholder="Période (jours)" required />
+            <button type="submit">Parier</button>
+        </form>
+        <div id="bet-results"></div>
 
         <!-- Liens vers les plateformes -->
         <div class="platform-links">
@@ -86,27 +103,38 @@
 
     <script>
         const stars = [];
+        const accessCode = 'W3S4RwzXmLyK29C33(@'; // Code d'accès
 
         document.getElementById('add-star-form').addEventListener('submit', async function(event) {
             event.preventDefault();
 
+            const enteredCode = document.getElementById('access-code').value;
+
+            // Vérification du code d'accès
+            if (enteredCode !== accessCode) {
+                alert('Code d\'accès incorrect. Vous ne pouvez pas ajouter de star.');
+                return;
+            }
+
             const category = document.getElementById('category').value;
             const starName = document.getElementById('star-name').value;
-            const starValue = parseFloat(document.getElementById('star-value').value);
 
             // Récupérer l'image de l'artiste par API
             const starImage = await fetchArtistImage(starName);
+
+            // Cote initiale automatique
+            const initialValue = Math.random() * 100; // Valeur aléatoire pour la cote initiale
 
             const star = {
                 category,
                 name: starName,
                 image: starImage,
-                value: starValue,
-                currentValue: starValue // Valeur actuelle initialisée à la valeur d'entrée
+                currentValue: initialValue // Valeur actuelle initialisée à une valeur aléatoire
             };
 
             stars.push(star);
             displayStars();
+            populateBetArtistSelect(); // Met à jour le sélecteur des paris
             this.reset();
         });
 
@@ -137,11 +165,53 @@
                     <img src="${star.image}" alt="${star.name}" style="width:100%; height:auto; border-radius:5px;">
                     <h3>${star.name}</h3>
                     <p>Categorie: ${star.category}</p>
-                    <p>Valeur: ${star.currentValue} AFRICOINS</p>
+                    <p>Valeur: ${star.currentValue.toFixed(2)} AFRICOINS</p>
                 `;
                 root.appendChild(card);
             });
         }
+
+        function populateBetArtistSelect() {
+            const select = document.getElementById('bet-artist');
+            select.innerHTML = '<option value="">Choisissez une star</option>'; // Réinitialiser le sélecteur
+            stars.forEach(star => {
+                const option = document.createElement('option');
+                option.value = star.name;
+                option.textContent = star.name;
+                select.appendChild(option);
+            });
+        }
+
+        document.getElementById('bet-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const artistName = document.getElementById('bet-artist').value;
+            const direction = document.getElementById('bet-direction').value;
+            const betAmount = parseFloat(document.getElementById('bet-amount').value);
+            const betPeriod = parseInt(document.getElementById('bet-period').value); // Récupérer la période
+
+            const artist = stars.find(star => star.name === artistName);
+            
+            if (artist) {
+                let futureValue = artist.currentValue;
+                for (let i = 0; i < betPeriod; i++) {
+                    futureValue += (Math.random() > 0.5 ? 1 : -1) * Math.random(); // Simule un changement de valeur
+                }
+
+                const won = (direction === 'up' && futureValue > artist.currentValue) || 
+                            (direction === 'down' && futureValue < artist.currentValue);
+                
+                if (won) {
+                    artist.currentValue += betAmount; // Gagner le pari
+                    document.getElementById('bet-results').innerText = `Vous avez gagné ! La nouvelle valeur est ${artist.currentValue.toFixed(2)} AFRICOINS.`;
+                } else {
+                    artist.currentValue -= betAmount; // Perdre le pari
+                    document.getElementById('bet-results').innerText = `Vous avez perdu. La nouvelle valeur est ${artist.currentValue.toFixed(2)} AFRICOINS.`;
+                }
+                
+                displayStars(); // Met à jour l'affichage des étoiles
+            }
+        });
 
         // Exemple de mise à jour de la valeur d'une star
         function updateStarValues() {
