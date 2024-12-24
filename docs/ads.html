@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Publicités et Collecte de Fonds - AfricoinMarket</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/ads.js" defer></script> <!-- Lien vers le fichier JavaScript -->
+    <script src="js/ads.js" defer></script>
+    <script src="js/cookies.js"></script> <!-- Assurez-vous d'inclure ce fichier -->
     <style>
         /* Styles pour le formulaire de publicité */
         #ad-upload {
@@ -196,6 +197,16 @@
             // Réinitialisation du formulaire
             feedbackForm.reset();
         });
+
+        // Récupérer le cookie lors du chargement de la page
+        window.onload = function() {
+            const username = getCookie("username");
+            if (username) {
+                console.log(`Bienvenue, ${username}`); // Affiche 'Bienvenue, JohnDoe'
+            } else {
+                console.log("Utilisateur non connecté.");
+            }
+        };
     </script>
 </body>
 </html>

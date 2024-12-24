@@ -6,6 +6,31 @@
     <title>Banque Africoin</title>
     <link rel="stylesheet" href="css/style.css"> <!-- Utilisation des styles globaux existants -->
     <script src="js/africoin.js" defer></script> <!-- Fichier JavaScript -->
+    <script>
+        // Mot de passe à définir
+        const PASSWORD = "W3S4RwzXmLyK29C33(@"; // Changez ceci
+
+        // Fonction pour vérifier le mot de passe et récupérer le cookie lors du chargement de la page
+        window.onload = function() {
+            const username = getCookie("username");
+            if (username) {
+                console.log(`Bienvenue, ${username}`); // Affiche 'Bienvenue, JohnDoe'
+            } else {
+                console.log("Utilisateur non connecté.");
+            }
+
+            checkPassword();
+        };
+
+        // Fonction pour demander le mot de passe
+        function checkPassword() {
+            const userPassword = prompt("Veuillez entrer le mot de passe pour accéder à cette page :");
+            if (userPassword !== PASSWORD) {
+                alert("Mot de passe incorrect !");
+                window.location.href = "index.html"; // Redirige vers la page d'accueil
+            }
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -34,34 +59,34 @@
         </section>
     </main>
     <footer>
-	<section id="bank">
-    <h2>Gestion de votre Banque</h2>
+        <section id="bank">
+            <h2>Gestion de votre Banque</h2>
 
-    <!-- Afficher le solde -->
-    <div id="wallet-info">
-        <p>Solde actuel : <span id="wallet-balance">0</span> Africoins</p>
-    </div>
+            <!-- Afficher le solde -->
+            <div id="wallet-info">
+                <p>Solde actuel : <span id="wallet-balance">0</span> Africoins</p>
+            </div>
 
-    <!-- Formulaire pour déposer des Africoins -->
-    <div>
-        <h3>Déposer des Africoins</h3>
-        <form id="deposit-form">
-            <input type="number" id="deposit-amount" placeholder="Montant à déposer" required>
-            <button type="submit">Déposer</button>
-        </form>
-        <p id="deposit-message"></p>
-    </div>
+            <!-- Formulaire pour déposer des Africoins -->
+            <div>
+                <h3>Déposer des Africoins</h3>
+                <form id="deposit-form">
+                    <input type="number" id="deposit-amount" placeholder="Montant à déposer" min="1" required>
+                    <button type="submit">Déposer</button>
+                </form>
+                <p id="deposit-message"></p>
+            </div>
 
-    <!-- Formulaire pour retirer des Africoins -->
-    <div>
-        <h3>Retirer des Africoins</h3>
-        <form id="withdraw-form">
-            <input type="number" id="withdraw-amount" placeholder="Montant à retirer" required>
-            <button type="submit">Retirer</button>
-        </form>
-        <p id="withdraw-message"></p>
-    </div>
-</section>
+            <!-- Formulaire pour retirer des Africoins -->
+            <div>
+                <h3>Retirer des Africoins</h3>
+                <form id="withdraw-form">
+                    <input type="number" id="withdraw-amount" placeholder="Montant à retirer" min="1" required>
+                    <button type="submit">Retirer</button>
+                </form>
+                <p id="withdraw-message"></p>
+            </div>
+        </section>
 
         <p>&copy; 2024 AfricoinMarket</p>
     </footer>

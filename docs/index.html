@@ -9,16 +9,22 @@
     <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
-</head>
-<body>
-    <div id="qrcode"></div>
     <script>
-        $(document).ready(function() {
+        // Créer un cookie lors du chargement de la page
+        window.onload = function() {
+            setCookie("username", "JohnDoe", 7); // Exemples de création de cookie
+            generateQRCode();
+        };
+
+        function generateQRCode() {
             $('#qrcode').qrcode({
                 text: 'https://votre-url-de-lapplication.com'
             });
-        });
+        }
     </script>
+</head>
+<body>
+    <div id="qrcode"></div>
 
     <header>
         <nav>
@@ -27,7 +33,7 @@
                 <span></span>
                 <span></span>
                 <span></span>
-                <ul id="menu">
+                <ul id="menu" aria-label="Menu principal">
                     <li><a href="index.html">Accueil</a></li>
                     <li><a href="africoin.html">Africoins</a></li>
                     <li><a href="shop-africoins.html">Acheter AFRICOINS</a></li>
