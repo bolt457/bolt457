@@ -7,7 +7,7 @@
     <title>Acheter Africoins</title>
     <link rel="stylesheet" href="css/style.css">
     <script>
-        let exchangeRateUsdToAfricoin = 1; // 1 USD = 1 AFRICOIN (référence)
+        let exchangeRateUsdToAfricoin = 1;
 
         // Initialisation de IndexedDB
         const dbName = "AfricoinMarketDB";
@@ -32,7 +32,6 @@
             console.error("Erreur d'ouverture de la base de données :", event.target.error);
         };
 
-        // Fonction pour ajouter un achat à IndexedDB
         function addPurchase(amount, method) {
             const transaction = db.transaction([storeName], "readwrite");
             const objectStore = transaction.objectStore(storeName);
@@ -46,7 +45,6 @@
             };
         }
 
-        // Fonction pour afficher le formulaire de paiement selon la méthode choisie
         function displayPaymentForm(method) {
             const formContainer = document.getElementById('payment-form-container');
             let formContent = `
@@ -83,6 +81,7 @@
                         <label for="paypal-email">Email PayPal :</label>
                         <input type="email" id="paypal-email" placeholder="Votre email PayPal" required>
                     `;
+                    formContent += `<button onclick="validateAndBuy('${method}'); createPayment();">Valider et Acheter</button>`;
                     break;
                 default:
                     formContent = '<p>Veuillez sélectionner une méthode de paiement.</p>';
@@ -91,18 +90,15 @@
             formContent += `<button onclick="validateAndBuy('${method}')">Valider et Acheter</button>`;
             formContainer.innerHTML = formContent;
 
-            // Mettre à jour le coût total
             document.getElementById('africoin-amount').addEventListener('input', updateTotalCost);
         }
 
-        // Fonction pour mettre à jour le coût total
         function updateTotalCost() {
             const africoinAmount = document.getElementById('africoin-amount').value;
             const totalCost = africoinAmount * exchangeRateUsdToAfricoin;
             document.getElementById('total-cost').textContent = `Coût total : ${totalCost.toFixed(2)} USD (référence)`;
         }
 
-        // Fonction pour valider le formulaire et acheter des Africoins
         function validateAndBuy(method) {
             const africoinAmount = document.getElementById('africoin-amount').value;
 
@@ -144,9 +140,62 @@
             }
 
             if (isValid) {
-                addPurchase(africoinAmount, method); // Ajout de l'achat à IndexedDB
+                addPurchase(africoinAmount, method);
                 alert(`Votre achat de ${africoinAmount} Africoins avec ${method} a été validé.`);
             }
+        }
+
+        // PayPal Functions
+        const clientId = 'AdGNPRjElhHQXHdgiNClhP...';
+        const clientSecret = 'EJKhN8nlxa9ikWIFuG-kvMuK538nVtgVQxKtg7R_nQC4q3z0TIEMwWWsrNX3YMMqa26i46e8-sL4EwLd';
+
+        async function getAccessToken() {
+            const authString = `${clientId}:${clientSecret}`;
+            const base64AuthString = btoa(authString);
+
+            const response = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Basic ${base64AuthString}`,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'grant_type=client_credentials'
+            });
+
+            const data = await response.json();
+            return data.access_token;
+        }
+
+        async function createPayment() {
+            const accessToken = await getAccessToken();
+
+            const response = await fetch('https://api-m.sandbox.paypal.com/v1/payments/payment', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    intent: 'sale',
+                    payer: {
+                        payment_method: 'paypal'
+                    },
+                    transactions: [{
+                        amount: {
+                            total: document.getElementById('total-cost').textContent.split(' ')[2], // Montant dynamique
+                            currency: 'USD'
+                        },
+                        description: 'Paiement de test'
+                    }],
+                    redirect_urls: {
+                        return_url: 'http://localhost:3000/success',
+                        cancel_url: 'http://localhost:3000/cancel'
+                    }
+                })
+            });
+
+            const data = await response.json();
+            console.log(data);
         }
     </script>
 </head>
@@ -179,7 +228,6 @@
                 <option value="PayPal">PayPal</option>
             </select>
 
-            <!-- Formulaire dynamique pour la méthode de paiement -->
             <div id="payment-form-container"></div>
         </section>
     </main>
