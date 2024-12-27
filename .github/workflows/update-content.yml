@@ -1,0 +1,26 @@
+name: Update Content
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Exécuter tous les jours à minuit UTC
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Update content
+        run: |
+          # Exemple de script pour mettre à jour le contenu
+          echo "Nouveau contenu" > data.txt
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add .
+          git commit -m 'Mise à jour du contenu'
+          git push
