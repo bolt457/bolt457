@@ -8,6 +8,17 @@
     <link rel="stylesheet" href="css/style.css"> <!-- Lien vers le fichier CSS -->
     <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then((registration) => {
+                    console.log('Service Worker enregistré avec succès :', registration);
+                }).catch((error) => {
+                    console.log('Échec de l\'enregistrement du Service Worker :', error);
+                });
+            });
+        }
+    </script>
 </head>
 <body>
     <header>
