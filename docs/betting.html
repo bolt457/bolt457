@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parier sur les Stars - AfricoinMarket</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -24,36 +26,57 @@
         <h1>Parier sur les Stars</h1>
         <p>Pariez sur les événements à venir dans différents domaines d'activités concernant vos stars favorites et leurs trophées.</p>
 
-        <div class="betting-options">
-            <h2>Paris disponibles</h2>
-            <form id="betForm">
-                <label for="star">Choisir une star :</label>
-                <select id="star" required>
-                    <option value="star1">Star 1</option>
-                    <option value="star2">Star 2</option>
-                    <option value="star3">Star 3</option>
-                </select>
-                <label for="betAmount">Montant à parier (AFRICOINS) :</label>
-                <input type="number" id="betAmount" required />
-                <button type="submit">Placer le pari</button>
+        <div id="star-search">
+            <h2>Recherche de Star</h2>
+            <form id="searchForm">
+                <label for="starName">Nom de la star :</label>
+                <input type="text" id="starName" placeholder="Nom de la star..." required>
+                <button type="submit">Rechercher</button>
             </form>
+            <div id="star-info">
+                <!-- L'image et les trophées de la star seront affichés ici -->
+            </div>
         </div>
 
-        <div id="trophy-info">
-            <h2>Informations sur les trophées</h2>
-            <label for="starSearch">Rechercher des trophées par star :</label>
-            <input type="text" id="starSearch" placeholder="Nom de la star..." />
-            <button id="searchButton" onclick="searchTrophies()">Rechercher</button>
-
-            <div id="trophies">
-                <!-- Les trophées associés à la star sélectionnée seront affichés ici -->
-            </div>
+        <div id="betting-options">
+            <h2>Paris disponibles</h2>
+            <form id="betForm">
+                <label for="betAmount">Montant à parier (AFRICOINS) :</label>
+                <input type="number" id="betAmount" required />
+                <label for="paymentMethod">Moyen de paiement :</label>
+                <select id="paymentMethod" required>
+                    <option value="visa">Visa</option>
+                    <option value="mobile">Mobile Money</option>
+                </select>
+                <div id="payment-details">
+                    <div id="visa-details">
+                        <label for="cardNumber">Numéro de Carte Visa :</label>
+                        <input type="text" id="cardNumber" placeholder="Numéro de Carte" required>
+                        <label for="expiryDate">Date d'Expiration :</label>
+                        <input type="text" id="expiryDate" placeholder="MM/AA" required>
+                        <label for="cvv">CVV :</label>
+                        <input type="text" id="cvv" placeholder="CVV" required>
+                    </div>
+                    <div id="mobile-details">
+                        <label for="mobileNumber">Numéro Mobile Money :</label>
+                        <input type="text" id="mobileNumber" placeholder="Numéro de Téléphone" required>
+                    </div>
+                </div>
+                <button type="submit">Placer le pari</button>
+            </form>
+            <p id="potentialReward"></p>
         </div>
 
         <div id="betHistory">
             <h2>Historique des paris</h2>
             <ul id="betList"></ul>
         </div>
+
+        <div>
+            <h2>Performances des Investissements</h2>
+            <canvas id="investmentChart" width="400" height="200"></canvas>
+        </div>
+        
     </main>
 
     <footer>
@@ -62,70 +85,112 @@
 
     <script src="js/betting.js"></script>
     <script>
-        // Fonction pour récupérer les informations des stars depuis le localStorage
-        function getStarsFromLocalStorage() {
-            const stars = localStorage.getItem('stars');
-            return stars ? JSON.parse(stars) : [];
-        }
+        // Fonction pour rechercher et afficher la star et ses trophées
+        document.getElementById('searchForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const starName = document.getElementById('starName').value.toLowerCase();
 
-        // Fonction pour rechercher les trophées d'une star
-        function searchTrophies() {
-            const starName = document.getElementById('starSearch').value.toLowerCase();
-
-            if (!starName) {
-                alert('Veuillez entrer le nom d\'une star pour rechercher ses trophées.');
-                return;
+            try {
+                const response = await fetch(`https://api.sportradar.us/sports/en/competitors/${starName}/profile.json`, {
+                    headers: {
+                        'apikey': 'NekARAnX0IZY44YBGpqm1Fkukloh1GL7vcf9t7cR'
+                    }
+                });
+                const data = await response.json();
+                displayStarInfo(data);
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la récupération des informations de la star.');
             }
+        });
 
-            const stars = getStarsFromLocalStorage();
-            const star = stars.find(s => s.name.toLowerCase() === starName);
+        // Fonction pour afficher les informations de la star
+        function displayStarInfo(data) {
+            const starInfoDiv = document.getElementById('star-info');
+            starInfoDiv.innerHTML = ''; // Effacer le contenu précédent
 
-            if (!star) {
-                alert('Star non trouvée.');
-                return;
-            }
+            const starDetails = document.createElement('div');
+            starDetails.innerHTML = `
+                <h3>${data.name}</h3>
+                <img src="${data.imageUrl}" alt="Image de la star">
+                <h4>Trophées Potentiels</h4>
+            `;
+            starInfoDiv.appendChild(starDetails);
 
-            displayTrophies(star.trophies);
-        }
-
-        // Fonction pour afficher les trophées
-        function displayTrophies(trophies) {
-            const trophiesDiv = document.getElementById('trophies');
-            trophiesDiv.innerHTML = ''; // Efface les trophées précédents
-
-            if (trophies.length === 0) {
-                trophiesDiv.innerHTML = '<p>Aucun trophée trouvé pour cette star.</p>';
-            } else {
-                trophies.forEach(trophy => {
+            data.trophies.forEach(trophy => {
+                if (!trophy.won) { // Vérifier que le trophée n'a pas encore été gagné
                     const trophyDiv = document.createElement('div');
                     trophyDiv.classList.add('trophy');
                     trophyDiv.innerHTML = `
                         <p><strong>${trophy.name}</strong></p>
                         <p>${trophy.category}</p>
                         <p>Cote: ${trophy.odds} AFRICOINS</p>
+                        <img src="${trophy.imageUrl}" alt="Image du trophée">
                     `;
-                    trophiesDiv.appendChild(trophyDiv);
-                });
-            }
+                    starInfoDiv.appendChild(trophyDiv);
+                }
+            });
         }
 
         // Gérer le formulaire de paris
         document.getElementById('betForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
-            const selectedStar = document.getElementById('star').value;
             const betAmount = document.getElementById('betAmount').value;
-            const betList = document.getElementById('betList');
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const potentialReward = calculatePotentialReward(betAmount);
 
+            const betList = document.getElementById('betList');
             const betItem = document.createElement('li');
-            betItem.textContent = `Paris sur ${selectedStar} avec ${betAmount} AFRICOINS.`;
+            betItem.textContent = `Pari de ${betAmount} AFRICOINS via ${paymentMethod}. Potentiel Gain: ${potentialReward} AFRICOINS.`;
             betList.appendChild(betItem);
+
+            document.getElementById('potentialReward').innerText = `Potentiel Gain: ${potentialReward} AFRICOINS`;
+
+            // Effacer les informations de la star après le pari
+            document.getElementById('star-info').innerHTML = '';
+
+            // Ajouter les détails de paiement (simulé)
+            if (paymentMethod === 'visa') {
+                const cardNumber = document.getElementById('cardNumber').value;
+                const expiryDate = document.getElementById('expiryDate').value;
+                const cvv = document.getElementById('cvv').value;
+                console.log(`Détails Visa - Numéro: ${cardNumber}, Expiry: ${expiryDate}, CVV: ${cvv}`);
+            } else if (paymentMethod === 'mobile') {
+                const mobileNumber = document.getElementById('mobileNumber').value;
+                console.log(`Détails Mobile Money - Numéro: ${mobileNumber}`);
+            }
         });
 
-        // Afficher les trophées lors du chargement de la page
-        window.onload = function() {
-            // Charger les trophées en fonction de la star recherchée
+        // Calculer la récompense potentielle
+        function calculatePotentialReward(amount) {
+            const odds = 2; // Cote fixe
+            return amount * odds;
+        }
+
+        // Configuration du graphique avec Chart.js
+        const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: 'Performance des Investissements',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                data: [10, 20, 15, 30, 25, 40, 35],
+            }]
         };
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {}
+        };
+
+        var investmentChart = new Chart(
+            document.getElementById('investmentChart'),
+            config
+        );
+
     </script>
 
 </body>
