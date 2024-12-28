@@ -6,8 +6,57 @@
     <title>Publicités et Collecte de Fonds - AfricoinMarket</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/ads.js" defer></script>
-    <script src="js/cookies.js"></script> <!-- Assurez-vous d'inclure ce fichier --> 
-	<script src="js/dynamicContent.js"></script> <!-- Inclure le script avec le chemin relatif -->
+    <script src="js/cookies.js"></script>
+    <script src="js/dynamicContent.js"></script>
+
+    <!-- Inclure les SDK Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
+    <!-- Script de Configuration Firebase -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_AC6Y58nXtGf9DHsRoYnNCh66DBOyZoQ",
+            authDomain: "device-streaming-e560d0c6.firebaseapp.com",
+            projectId: "device-streaming-e560d0c6",
+            storageBucket: "device-streaming-e560d0c6.appspot.com",
+            messagingSenderId: "253144685018",
+            appId: "your-app-id"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+    </script>
+
+    <script>
+        const auth = firebase.auth();
+        function signUp() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    console.log('Signed Up', userCredential.user);
+                })
+                .catch((error) => {
+                    console.error('Error', error);
+                });
+        }
+
+        const db = firebase.firestore();
+        function addData() {
+            db.collection("users").add({
+                name: "John Doe",
+                email: "john.doe@example.com"
+            })
+            .then((docRef) => {
+                console.log("Document written with ID: ", docRef.id);
+            })
+            .catch((error) => {
+                console.error("Error adding document: ", error);
+            });
+        }
+    </script>
+
     <style>
         /* Styles pour le formulaire de publicité */
         #ad-upload {
@@ -39,6 +88,14 @@
     </header>
 
     <main>
+        <!-- Formulaire d'inscription -->
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="signUp()">Sign Up</button>
+        
+        <!-- Bouton pour ajouter des données -->
+        <button onclick="addData()">Add Data</button>
+
         <!-- Formulaire d'importation de publicités -->
         <section id="ad-upload">
             <h3>Importer une Publicité</h3>
@@ -125,20 +182,20 @@
             if (event.target.value === 'local') {
                 adFile.style.display = 'block';
                 adUrl.style.display = 'none';
-                adUrl.value = ''; // Réinitialiser l'URL
-                adFile.previousElementSibling.style.display = 'block'; // Afficher le label pour le fichier
-                adUrl.previousElementSibling.style.display = 'none'; // Masquer le label pour l'URL
+                adUrl.value = '';
+                adFile.previousElementSibling.style.display = 'block';
+                adUrl.previousElementSibling.style.display = 'none';
             } else {
                 adFile.style.display = 'none';
                 adUrl.style.display = 'block';
-                adFile.value = ''; // Réinitialiser le fichier
-                adUrl.previousElementSibling.style.display = 'block'; // Afficher le label pour l'URL
-                adFile.previousElementSibling.style.display = 'none'; // Masquer le label pour le fichier
+                adFile.value = '';
+                adUrl.previousElementSibling.style.display = 'block';
+                adFile.previousElementSibling.style.display = 'none';
             }
         });
 
         adForm.addEventListener('submit', (event) => {
-            event.preventDefault(); // Empêche le rechargement de la page
+            event.preventDefault();
 
             let adItem = document.createElement('div');
             adItem.classList.add('ad-item');
@@ -159,12 +216,11 @@
                 adList.appendChild(adItem);
             }
 
-            // Réinitialisation du formulaire
             adForm.reset();
             adFile.style.display = 'none';
             adUrl.style.display = 'none';
-            adFile.previousElementSibling.style.display = 'none'; // Masquer le label
-            adUrl.previousElementSibling.style.display = 'none'; // Masquer le label
+            adFile.previousElementSibling.style.display = 'none';
+            adUrl.previousElementSibling.style.display = 'none';
         });
 
         // Gestion du formulaire de feedback
@@ -172,19 +228,16 @@
         const feedbackList = document.getElementById('feedback-list');
 
         feedbackForm.addEventListener('submit', (event) => {
-            event.preventDefault(); // Empêche le rechargement de la page
+            event.preventDefault();
 
-            // Récupération des valeurs du formulaire
             const platform = document.getElementById('platform').value;
             const feedbackText = document.getElementById('feedback-text').value;
 
-            // Validation basique
             if (!platform || !feedbackText) {
                 alert('Veuillez remplir tous les champs.');
                 return;
             }
 
-            // Création d'un nouvel élément de feedback
             const feedbackItem = document.createElement('div');
             feedbackItem.classList.add('feedback-item');
             feedbackItem.innerHTML = `
@@ -192,10 +245,7 @@
                 <p>${feedbackText}</p>
             `;
 
-            // Ajout du feedback à la liste
             feedbackList.appendChild(feedbackItem);
-
-            // Réinitialisation du formulaire
             feedbackForm.reset();
         });
 
@@ -203,7 +253,7 @@
         window.onload = function() {
             const username = getCookie("username");
             if (username) {
-                console.log(`Bienvenue, ${username}`); // Affiche 'Bienvenue, JohnDoe'
+                console.log(`Bienvenue, ${username}`);
             } else {
                 console.log("Utilisateur non connecté.");
             }
