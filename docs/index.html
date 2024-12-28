@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="css/style.css"> <!-- Lien vers le fichier CSS -->
     <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-	<script src="js/dynamicContent.js"></script> <!-- Inclure le script avec le chemin relatif -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script> <!-- Script GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script> <!-- Script Anime.js -->
+    <script src="js/dynamicContent.js"></script> <!-- Inclure le script avec le chemin relatif -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -19,6 +21,28 @@
                 });
             });
         }
+    </script>
+    <script>
+        // Exemple d'animation avec GSAP
+        window.addEventListener('load', function() {
+            gsap.to("#gsap-box", { 
+                duration: 2, 
+                x: 300, 
+                rotation: 360, 
+                backgroundColor: "yellow" 
+            });
+        });
+
+        // Exemple d'animation avec Anime.js
+        document.addEventListener('DOMContentLoaded', function() {
+            anime({
+                targets: '#anime-box',
+                translateX: 250,
+                rotate: '1turn',
+                backgroundColor: '#FFF',
+                duration: 2000
+            });
+        });
     </script>
 </head>
 <body>
@@ -88,6 +112,9 @@
     <footer>
         <p>&copy; 2024 AfricoinMarket</p>
     </footer>
+
+    <div id="gsap-box" style="width: 100px; height: 100px; background-color: blue; margin-top: 20px;"></div>
+    <div id="anime-box" style="width: 100px; height: 100px; background-color: red; margin-top: 20px;"></div>
 
     <div id="root"></div> <!-- Point d'ancrage pour votre application React -->
 
