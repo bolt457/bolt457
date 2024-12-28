@@ -1,65 +1,69 @@
-import express from 'express';
-import { scrapeData } from './scraper.js';
-import { fetchDataFromAPI } from './api_integration.js';
-import Queue from 'bull';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import './index.css';
-import App from './App';
 
-ReactDOM.render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>,
-    document.getElementById('root')
+// Composant d'Animation
+const AnimatedComponent = ({ children }) => {
+  return (
+    <div>
+      {children}
+    </div>
+  );
+};
+
+// Écrans Individuels
+const HomeScreen = ({ navigation }) => (
+  <AnimatedComponent>
+    <div style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <h1>Bienvenue sur AfricoinMarket</h1>
+      <button onClick={() => navigation.navigate('Africoin')}>En savoir plus sur les Africoins</button>
+    </div>
+  </AnimatedComponent>
 );
 
-const app = express();
-const PORT = process.env.PORT || 3001;
+const AfricoinScreen = () => (
+  <div style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <h1>Page des Africoins</h1>
+  </div>
+);
 
-const updateOddsQueue = new Queue('update-odds', 'redis://127.0.0.1:6379');
+const ShopScreen = () => (
+  <div style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <h1>Page de la Boutique</h1>
+  </div>
+);
 
-app.use(express.json());
+// Navigateur Principal
+const Stack = createNativeStackNavigator();
 
-app.get('/api', (req, res) => {
-    res.status(200).json({ message: 'Bienvenue sur l\'API!' });
-});
+const App = () => (
+  <NavigationContainer>
+    <Stack.Navigator initialRouteName="Home">
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Africoin" component={AfricoinScreen} />
+      <Stack.Screen name="Shop" component={ShopScreen} />
+    </Stack.Navigator>
+  </NavigationContainer>
+);
 
-app.get('/api/scrape', async (req, res) => {
-    const url = req.query.url;
-    const data = await scrapeData(url);
-    res.status(200).json(data);
-});
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
 
-app.get('/api/data', async (req, res) => {
-    const endpoint = req.query.endpoint;
-    const params = req.query.params;
-    const data = await fetchDataFromAPI(endpoint, params);
-    res.status(200).json(data);
-});
-
-app.post('/api/update_odds', (req, res) => {
-    updateOddsQueue.add();  
-    res.status(200).json({ message: 'Mise à jour des cotes lancée.' });
-});
-
-updateOddsQueue.process(async (job) => {
-    console.log('Mise à jour des cotes en cours...');
-    // Ajoutez ici votre logique de mise à jour des cotes
-    return { message: 'Cotes mises à jour' };
-});
-
-app.listen(PORT, () => {
-    console.log(`Serveur en écoute sur le port ${PORT}`);
-});
+// Service Worker
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-            .then((registration) => {
-                console.log('Service Worker enregistré avec succès:', registration);
-            })
-            .catch((error) => {
-                console.log('Échec de l\'enregistrement du Service Worker:', error);
-            });
-    });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then((registration) => {
+        console.log('Service Worker enregistré avec succès:', registration);
+      })
+      .catch((error) => {
+        console.log('Échec de l\'enregistrement du Service Worker:', error);
+      });
+  });
 }
