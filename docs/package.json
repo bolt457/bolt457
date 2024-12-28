@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "react-scripts build"
   },
   "dependencies": {
     "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
@@ -35,7 +36,8 @@
     "react-dom": "^19.0.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.1.0",
-    "react-scripts": "^3.0.1",
+    "react-scripts": "^5.0.1",
+    "react-transition-group": "^4.4.5",
     "redux": "^5.0.1",
     "socket.io": "^4.8.1",
     "stripe": "^17.4.0",
