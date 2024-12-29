@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parier sur les Stars - AfricoinMarket</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
-    <script src="js/dynamicContent.js"></script> <!-- Inclure le script avec le chemin relatif -->
+    <script src="js/dynamicContent.js"></script>
 </head>
 <body>
 
@@ -23,7 +24,7 @@
         </nav>
     </header>
 
-    <main>
+    <main class="container">
         <h1>Parier sur les Stars</h1>
         <p>Pariez sur les événements à venir dans différents domaines d'activités concernant vos stars favorites et leurs trophées.</p>
 
@@ -36,6 +37,19 @@
             </form>
             <div id="star-info">
                 <!-- L'image et les trophées de la star seront affichés ici -->
+            </div>
+        </div>
+
+        <!-- Ajout de la section pour importer des images et vidéos locales -->
+        <div id="local-import">
+            <h2>Importer des images ou vidéos</h2>
+            <form id="importForm">
+                <label for="fileInput">Sélectionner une image ou vidéo :</label>
+                <input type="file" id="fileInput" accept="image/*,video/*" required>
+                <button type="submit">Importer</button>
+            </form>
+            <div id="imported-media">
+                <!-- Les images ou vidéos importées seront affichées ici -->
             </div>
         </div>
 
@@ -77,7 +91,6 @@
             <h2>Performances des Investissements</h2>
             <canvas id="investmentChart" width="400" height="200"></canvas>
         </div>
-        
     </main>
 
     <footer>
@@ -111,7 +124,7 @@
             starInfoDiv.innerHTML = ''; // Effacer le contenu précédent
 
             const starDetails = document.createElement('div');
-            starDetails.innerHTML = `
+            starDetails.innerHTML = ` 
                 <h3>${data.name}</h3>
                 <img src="${data.imageUrl}" alt="Image de la star">
                 <h4>Trophées Potentiels</h4>
@@ -132,6 +145,43 @@
                 }
             });
         }
+
+        // Fonction pour gérer l'importation des images ou vidéos locales
+        document.getElementById('importForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById('fileInput').files[0];
+
+            if (!fileInput) {
+                alert("Veuillez sélectionner un fichier.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const fileContent = event.target.result;
+                const importedMediaDiv = document.getElementById('imported-media');
+                importedMediaDiv.innerHTML = ''; // Effacer le contenu précédent
+
+                // Vérifier si le fichier est une image ou une vidéo et l'afficher
+                if (fileInput.type.startsWith('image')) {
+                    // Afficher une image
+                    const image = document.createElement('img');
+                    image.src = fileContent;
+                    image.alt = "Image importée";
+                    image.style.maxWidth = '100%';
+                    importedMediaDiv.appendChild(image);
+                } else if (fileInput.type.startsWith('video')) {
+                    // Afficher une vidéo
+                    const video = document.createElement('video');
+                    video.src = fileContent;
+                    video.controls = true;
+                    video.style.maxWidth = '100%';
+                    importedMediaDiv.appendChild(video);
+                }
+            };
+
+            reader.readAsDataURL(fileInput); // Lire le fichier comme URL de données
+        });
 
         // Gérer le formulaire de paris
         document.getElementById('betForm').addEventListener('submit', function(event) {
@@ -168,30 +218,6 @@
             const odds = 2; // Cote fixe
             return amount * odds;
         }
-
-        // Configuration du graphique avec Chart.js
-        const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
-        const data = {
-            labels: labels,
-            datasets: [{
-                label: 'Performance des Investissements',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                data: [10, 20, 15, 30, 25, 40, 35],
-            }]
-        };
-
-        const config = {
-            type: 'line',
-            data: data,
-            options: {}
-        };
-
-        var investmentChart = new Chart(
-            document.getElementById('investmentChart'),
-            config
-        );
-
     </script>
 
 </body>

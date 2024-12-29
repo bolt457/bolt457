@@ -4,29 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Banque Africoin</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Basic animations */
+        h2 {
+            transition: color 0.3s ease;
+        }
+        h2:hover {
+            color: #007bff;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
     <script>
         const PASSWORD = "W3S4RwzXmLyK29C33(@";
         let db;
-        const conversionRateAPI = "https://api.exchangerate-api.com/v4/latest/XAF"; // Exemple d'API pour le Franc CFA
-        let conversionRates = {};
 
         window.onload = function() {
             initDatabase();
-            fetchConversionRate();
         };
-
-        function fetchConversionRate() {
-            fetch(conversionRateAPI)
-                .then(response => {
-                    if (!response.ok) throw new Error('Erreur lors de la récupération des taux de conversion');
-                    return response.json();
-                })
-                .then(data => {
-                    conversionRates = data.rates; // Sauvegarde des taux de conversion
-                })
-                .catch(error => console.error('Erreur de récupération des taux de conversion:', error));
-        }
 
         function initDatabase() {
             const request = indexedDB.open('AfricoinDB', 1);
@@ -87,126 +89,42 @@
             document.getElementById('purchaseForm').addEventListener('submit', function(event) {
                 event.preventDefault();
                 const localAmount = parseFloat(document.getElementById('purchase-amount').value);
-                const currency = document.getElementById('currency-select').value; // Devise choisie
-
-                // Validation du montant
+                
+                // Validate amount
                 if (isNaN(localAmount) || localAmount <= 0) {
                     alert("Veuillez entrer un montant valide.");
                     return;
                 }
 
-                const purchaseAmount = localAmount * conversionRates[currency]; // Conversion en USD
-                const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+                // Direct conversion: 1 Africoin = 1 Dollar
+                const purchaseAmount = localAmount;  // Directly in USD
+                const mobileNumber = document.getElementById('mobile-number').value;
+                const email = document.getElementById('email').value;
 
-                if (paymentMethod === 'Mobile Payment') {
-                    const mobileNumber = document.getElementById('mobile-number').value;
-
-                    // Validation du numéro de mobile
-                    if (!validateMobileNumber(mobileNumber)) {
-                        alert("Numéro de mobile invalide.");
-                        return;
-                    }
-
-                    document.getElementById('purchase-message').textContent = `Achat de ${localAmount} ${currency} (${purchaseAmount.toFixed(2)} USD) avec Mobile Money. Numéro : ${mobileNumber}`;
-                    payWithOrangeMoney(); // Appel à la fonction de paiement
-                } else {
-                    const cardNumber = document.getElementById('card-number').value;
-                    const cardExpiry = document.getElementById('card-expiry').value;
-                    const cardCVV = document.getElementById('card-cvv').value;
-                    document.getElementById('purchase-message').textContent = `Achat de ${localAmount} ${currency} (${purchaseAmount.toFixed(2)} USD) avec Visa. Numéro : ${cardNumber}`;
+                // Validate mobile number
+                if (!validateMobileNumber(mobileNumber)) {
+                    alert("Numéro de mobile invalide.");
+                    return;
                 }
 
-                updateAccountData(purchaseAmount, purchaseAmount); // Ajouter les Africoins
+                document.getElementById('purchase-message').textContent = `Achat de ${localAmount} Africoins (${purchaseAmount.toFixed(2)} USD) avec Mobile Money. Numéro : ${mobileNumber}`;
+                updateAccountData(purchaseAmount, purchaseAmount); // Add Africoins
                 loadAccountData();
                 alert("Achat réussi !");
             });
 
-            document.querySelectorAll('input[name="payment-method"]').forEach((input) => {
-                input.addEventListener('change', function() {
-                    const isMobilePayment = this.value === 'Mobile Payment';
-                    document.getElementById('mobile-form').style.display = isMobilePayment ? 'block' : 'none';
-                    document.getElementById('card-form').style.display = isMobilePayment ? 'none' : 'block';
-                });
-            });
-
-            // Logic for withdrawal
-            document.getElementById('withdrawForm').addEventListener('submit', function(event) {
-                event.preventDefault();
-                const withdrawAmount = parseInt(document.getElementById('withdraw-amount').value);
-                const paymentMethod = document.querySelector('input[name="withdraw-method"]:checked').value;
-
-                const transaction = db.transaction(['africoins'], 'readwrite');
-                const store = transaction.objectStore('africoins');
-                const request = store.get(1); // Compte de l'utilisateur
-
-                request.onsuccess = function(event) {
-                    const account = event.target.result;
-                    if (account && account.balance >= withdrawAmount) {
-                        // Déduire le montant du compte de l'utilisateur
-                        account.balance -= withdrawAmount;
-                        store.put(account);
-
-                        // Processus de retrait
-                        let message = `Retrait de ${withdrawAmount} Africoins réussi par ${paymentMethod}.`;
-                        if (paymentMethod === 'Mobile Money') {
-                            const mobileNumber = document.getElementById('withdraw-mobile-number').value;
-                            message += ` Numéro : ${mobileNumber}`;
-                            payWithOrangeMoney(); // Appel à la fonction de paiement
-                        } else {
-                            const cardNumber = document.getElementById('withdraw-card-number').value;
-                            message += ` Numéro de carte : ${cardNumber}`;
-                        }
-
-                        document.getElementById('withdraw-message').textContent = message;
-                        loadAccountData(); // Met à jour les données pour l'utilisateur
-                    } else {
-                        document.getElementById('withdraw-message').textContent = "Solde insuffisant.";
-                    }
-                };
-            });
-
-            // Gérer l'affichage des formulaires pour le retrait
-            document.querySelectorAll('input[name="withdraw-method"]').forEach((input) => {
-                input.addEventListener('change', function() {
-                    const isMobilePayment = this.value === 'Mobile Money';
-                    document.getElementById('withdraw-mobile-form').style.display = isMobilePayment ? 'block' : 'none';
-                    document.getElementById('withdraw-card-form').style.display = isMobilePayment ? 'none' : 'block';
-                });
+            // Afficher le montant en dollars lors de la saisie
+            document.getElementById('purchase-amount').addEventListener('input', function() {
+                const amount = parseFloat(this.value);
+                const dollarAmount = isNaN(amount) ? 0 : amount; // 1 Africoin = 1 Dollar
+                document.getElementById('dollar-amount').textContent = `Montant en dollars : ${dollarAmount.toFixed(2)} USD`;
             });
         });
 
-        // Fonction pour valider le numéro de mobile
+        // Function to validate mobile number
         function validateMobileNumber(number) {
-            const regex = /^[0-9]{9}$/; // Ajustez ce regex selon le format de numéro valide
+            const regex = /^[0-9]{9}$/; // Adjust this regex according to valid number format
             return regex.test(number);
-        }
-
-        // Fonction pour le paiement avec Orange Money
-        function payWithOrangeMoney() {
-            const url = "https://api.orange.com/oauth/v2/token";
-            const client_id = "pBH1UaW5othQPOPXJyjFDRn8fgmaD7dt";
-            const client_secret = "YOUR_CLIENT_SECRET"; // Remplace par ton client secret
-
-            const auth = btoa(`${client_id}:${client_secret}`);
-            const headers = new Headers();
-            headers.append("Authorization", `Basic ${auth}`);
-            headers.append("Content-Type", "application/x-www-form-urlencoded");
-
-            const body = new URLSearchParams();
-            body.append("grant_type", "client_credentials");
-
-            fetch(url, {
-                method: "POST",
-                headers: headers,
-                body: body
-            })
-            .then(response => response.json())
-            .then(data => {
-                const accessToken = data.access_token;
-                alert("Token d'accès obtenu avec succès : " + accessToken);
-                // Ajouter ici la logique pour initier le paiement avec Orange Money en utilisant l'access token
-            })
-            .catch(error => console.error("Erreur : ", error));
         }
     </script>
 </head>
@@ -221,7 +139,7 @@
         </nav>
     </header>
     <main>
-        <section id="emission">
+        <section id="emission" class="fade-in">
             <h2>Émettre des Africoins</h2>
             <form id="emissionForm">
                 <label for="amount">Montant à émettre :</label>
@@ -231,33 +149,17 @@
             <p id="emissionResult"></p>
         </section>
 
-        <section id="achat">
+        <section id="achat" class="fade-in">
             <h2>Achat d'Africoins</h2>
             <form id="purchaseForm">
                 <label for="purchase-amount">Montant à acheter :</label>
                 <input type="number" id="purchase-amount" name="purchase-amount" min="1" required>
-                <label for="currency-select">Choisissez votre devise :</label>
-                <select id="currency-select">
-                    <option value="EUR">Euro</option>
-                    <option value="GBP">Livre Sterling</option>
-                    <option value="XAF">Franc CFA</option>
-                    <!-- Ajoutez d'autres devises ici -->
-                </select>
-                <div>
-                    <label><input type="radio" name="payment-method" value="Mobile Payment" required> Paiement Mobile</label>
-                    <label><input type="radio" name="payment-method" value="Visa" required> Visa</label>
-                </div>
+                <p id="dollar-amount">Montant en dollars : 0.00 USD</p>
                 
-                <div id="mobile-form" style="display: none;">
+                <div id="mobile-form">
                     <h3>Mobile Money</h3>
                     <input type="text" id="mobile-number" placeholder="Numéro de mobile" required>
-                </div>
-
-                <div id="card-form" style="display: none;">
-                    <h3>Détails de la Carte</h3>
-                    <input type="text" id="card-number" placeholder="Numéro de carte" required>
-                    <input type="text" id="card-expiry" placeholder="Date d'expiration (MM/AA)" required>
-                    <input type="text" id="card-cvv" placeholder="CVV" required>
+                    <input type="email" id="email" placeholder="Votre email" required>
                 </div>
 
                 <button type="submit">Acheter</button>
@@ -265,35 +167,7 @@
             <p id="purchase-message"></p>
         </section>
 
-        <section id="retrait">
-            <h2>Retirer des Africoins</h2>
-            <form id="withdrawForm">
-                <label for="withdraw-amount">Montant à retirer :</label>
-                <input type="number" id="withdraw-amount" name="withdraw-amount" min="1" required>
-                
-                <div>
-                    <label><input type="radio" name="withdraw-method" value="Mobile Money" required> Mobile Money</label>
-                    <label><input type="radio" name="withdraw-method" value="Visa" required> Visa</label>
-                </div>
-
-                <div id="withdraw-mobile-form" style="display: none;">
-                    <h3>Mobile Money</h3>
-                    <input type="text" id="withdraw-mobile-number" placeholder="Numéro de mobile" required>
-                </div>
-
-                <div id="withdraw-card-form" style="display: none;">
-                    <h3>Détails de la Carte</h3>
-                    <input type="text" id="withdraw-card-number" placeholder="Numéro de carte" required>
-                    <input type="text" id="withdraw-card-expiry" placeholder="Date d'expiration (MM/AA)" required>
-                    <input type="text" id="withdraw-card-cvv" placeholder="CVV" required>
-                </div>
-
-                <button type="submit">Retirer</button>
-            </form>
-            <p id="withdraw-message"></p>
-        </section>
-
-        <section id="gestion">
+        <section id="gestion" class="fade-in">
             <h2>Gestion des Africoins</h2>
             <p>Nombre total d'Africoins en circulation : <span id="totalAfricoins">0</span></p>
             <p>Solde de votre portefeuille : <span id="wallet-balance">0</span> Africoins</p>

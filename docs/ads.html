@@ -5,58 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Publicités et Collecte de Fonds - AfricoinMarket</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/ads.js" defer></script>
-    <script src="js/cookies.js"></script>
-    <script src="js/dynamicContent.js"></script>
-
-    <!-- Inclure les SDK Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-
-    <!-- Script de Configuration Firebase -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyC_AC6Y58nXtGf9DHsRoYnNCh66DBOyZoQ",
-            authDomain: "device-streaming-e560d0c6.firebaseapp.com",
-            projectId: "device-streaming-e560d0c6",
-            storageBucket: "device-streaming-e560d0c6.appspot.com",
-            messagingSenderId: "253144685018",
-            appId: "your-app-id"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-    </script>
-
-    <script>
-        const auth = firebase.auth();
-        function signUp() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    console.log('Signed Up', userCredential.user);
-                })
-                .catch((error) => {
-                    console.error('Error', error);
-                });
-        }
-
-        const db = firebase.firestore();
-        function addData() {
-            db.collection("users").add({
-                name: "John Doe",
-                email: "john.doe@example.com"
-            })
-            .then((docRef) => {
-                console.log("Document written with ID: ", docRef.id);
-            })
-            .catch((error) => {
-                console.error("Error adding document: ", error);
-            });
-        }
-    </script>
-
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         /* Styles pour le formulaire de publicité */
         #ad-upload {
@@ -88,15 +37,6 @@
     </header>
 
     <main>
-        <!-- Formulaire d'inscription -->
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="signUp()">Sign Up</button>
-        
-        <!-- Bouton pour ajouter des données -->
-        <button onclick="addData()">Add Data</button>
-
-        <!-- Formulaire d'importation de publicités -->
         <section id="ad-upload">
             <h3>Importer une Publicité</h3>
             <form id="ad-form">
@@ -105,13 +45,19 @@
                     <option value="local">Fichier Local</option>
                     <option value="web">Lien Web</option>
                 </select>
+                
                 <div id="file-inputs">
-                    <label for="ad-file" style="display: none;">Sélectionnez votre fichier :</label>
-                    <input type="file" id="ad-file" accept="image/*" style="display: none;" />
-                    <label for="ad-url" style="display: none;">Entrez l'URL de la publicité :</label>
-                    <input type="url" id="ad-url" placeholder="Entrez l'URL de la publicité" style="display: none;" />
+                    <div id="file-upload">
+                        <label for="ad-file">Sélectionnez votre fichier :</label>
+                        <input type="file" id="ad-file" accept="image/*,video/*" />
+                    </div>
+                    <div id="url-input" style="display: none;">
+                        <label for="ad-url">Entrez l'URL de la publicité :</label>
+                        <input type="url" id="ad-url" placeholder="Entrez l'URL de la publicité" required />
+                    </div>
                 </div>
-                <button type="submit">Soumettre</button>
+                
+                <button type="submit">Confirmer l'importation</button>
             </form>
             <div id="ad-list">
                 <h4>Publicités Importées :</h4>
@@ -119,48 +65,17 @@
             </div>
         </section>
 
-        <h2>Publicité, Collecte de Fonds & Partenariats</h2>
-        <p>Explorez des plateformes fiables pour soumettre votre projet AfricoinMarket et trouver des partenaires ou des investisseurs potentiels.</p>
-
-        <!-- Collecte de fonds et partenariats -->
-        <section id="crowdfunding">
-            <h3>Soumettre votre Projet</h3>
-            <p>Voici des plateformes où vous pouvez soumettre votre projet et votre vision :</p>
-            <ul>
-                <li><a href="https://vc4a.com/" target="_blank">VC4A (Venture Capital for Africa)</a></li>
-                <li><a href="https://africarena.com/" target="_blank">AfricArena</a></li>
-                <li><a href="https://www.tonyelumelufoundation.org/" target="_blank">Tony Elumelu Foundation</a></li>
-                <li><a href="https://startupbootcamp.org/" target="_blank">Startupbootcamp</a></li>
-                <li><a href="https://www.afdb.org/en/topics-and-sectors/initiatives-partnerships/africa-investment-forum" target="_blank">Africa Investment Forum</a></li>
-                <li><a href="https://www.seedstars.com/" target="_blank">Seedstars</a></li>
-                <li><a href="https://endeavor.org/" target="_blank">Endeavor</a></li>
-            </ul>
-        </section>
-
         <!-- Section Feedback -->
         <section id="feedback">
             <h3>Partagez votre expérience</h3>
-            <p>Vous avez utilisé l'une des plateformes ci-dessus ? Partagez votre feedback ou les résultats obtenus pour inspirer la communauté.</p>
             <form id="feedback-form">
-                <label for="platform">Sélectionnez la plateforme :</label>
-                <select id="platform" required>
-                    <option value="">-- Sélectionnez --</option>
-                    <option value="VC4A">VC4A</option>
-                    <option value="AfricArena">AfricArena</option>
-                    <option value="Tony Elumelu Foundation">Tony Elumelu Foundation</option>
-                    <option value="Startupbootcamp">Startupbootcamp</option>
-                    <option value="Africa Investment Forum">Africa Investment Forum</option>
-                    <option value="Seedstars">Seedstars</option>
-                    <option value="Endeavor">Endeavor</option>
-                </select>
                 <label for="feedback-text">Votre retour :</label>
                 <textarea id="feedback-text" rows="4" placeholder="Décrivez votre expérience..." required></textarea>
                 <button type="submit">Soumettre</button>
             </form>
 
             <div id="feedback-list">
-                <h4>Feedback des utilisateurs :</h4>
-                <!-- Les feedbacks soumis s'afficheront ici -->
+                <h4>Commentaires des utilisateurs :</h4>
             </div>
         </section>
     </main>
@@ -169,59 +84,94 @@
         <p>&copy; 2024 AfricoinMarket</p>
     </footer>
 
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
     <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_AC6Y58nXtGf9DHsRoYnNCh66DBOyZoQ",
+            authDomain: "device-streaming-e560d0c6.firebaseapp.com",
+            projectId: "device-streaming-e560d0c6",
+            storageBucket: "device-streaming-e560d0c6.appspot.com",
+            messagingSenderId: "253144685018",
+            appId: "your-app-id"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+        const db = firebase.firestore();
+
         // Gestion du formulaire de publicité
         const adForm = document.getElementById('ad-form');
         const adList = document.getElementById('ad-list');
         const adFile = document.getElementById('ad-file');
         const adUrl = document.getElementById('ad-url');
         const adType = document.getElementById('ad-type');
-        const fileInputs = document.getElementById('file-inputs');
+        const urlInput = document.getElementById('url-input');
+        const fileUpload = document.getElementById('file-upload');
 
         adType.addEventListener('change', (event) => {
             if (event.target.value === 'local') {
-                adFile.style.display = 'block';
-                adUrl.style.display = 'none';
+                fileUpload.style.display = 'block';
+                urlInput.style.display = 'none';
                 adUrl.value = '';
-                adFile.previousElementSibling.style.display = 'block';
-                adUrl.previousElementSibling.style.display = 'none';
             } else {
-                adFile.style.display = 'none';
-                adUrl.style.display = 'block';
+                fileUpload.style.display = 'none';
+                urlInput.style.display = 'block';
                 adFile.value = '';
-                adUrl.previousElementSibling.style.display = 'block';
-                adFile.previousElementSibling.style.display = 'none';
             }
         });
 
         adForm.addEventListener('submit', (event) => {
             event.preventDefault();
 
-            let adItem = document.createElement('div');
-            adItem.classList.add('ad-item');
-
-            if (adType.value === 'local') {
-                const file = adFile.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        adItem.innerHTML = `<img src="${e.target.result}" alt="Publicité" style="max-width: 200px; margin: 10px;" />`;
-                        adList.appendChild(adItem);
-                    };
-                    reader.readAsDataURL(file);
-                }
+            const file = adFile.files[0];
+            if (file) {
+                const storageRef = storage.ref(`ads/${file.name}`);
+                storageRef.put(file).then(() => {
+                    storageRef.getDownloadURL().then((url) => {
+                        displayAd(url);
+                        saveAdToFirestore(url, file.name, file.type);
+                    });
+                }).catch((error) => {
+                    console.error("Erreur lors de l'importation du fichier : ", error);
+                });
             } else {
                 const url = adUrl.value;
-                adItem.innerHTML = `<a href="${url}" target="_blank"><img src="${url}" alt="Publicité" style="max-width: 200px; margin: 10px;" /></a>`;
-                adList.appendChild(adItem);
+                if (url) {
+                    displayAd(url);
+                    saveAdToFirestore(url, "Publicité URL", "URL");
+                }
             }
 
             adForm.reset();
-            adFile.style.display = 'none';
-            adUrl.style.display = 'none';
-            adFile.previousElementSibling.style.display = 'none';
-            adUrl.previousElementSibling.style.display = 'none';
+            fileUpload.style.display = 'none';
+            urlInput.style.display = 'none';
+            adFile.value = '';
+            adUrl.value = '';
         });
+
+        function displayAd(url) {
+            const adItem = document.createElement('div');
+            adItem.classList.add('ad-item');
+            adItem.innerHTML = `<img src="${url}" alt="Publicité" style="max-width: 200px; margin: 10px;" />`;
+            adList.appendChild(adItem);
+        }
+
+        function saveAdToFirestore(url, name, type) {
+            db.collection("ads").add({
+                url: url,
+                name: name,
+                type: type,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then((docRef) => {
+                console.log("Document écrit avec ID : ", docRef.id);
+            }).catch((error) => {
+                console.error("Erreur lors de l'ajout du document : ", error);
+            });
+        }
 
         // Gestion du formulaire de feedback
         const feedbackForm = document.getElementById('feedback-form');
@@ -230,34 +180,19 @@
         feedbackForm.addEventListener('submit', (event) => {
             event.preventDefault();
 
-            const platform = document.getElementById('platform').value;
             const feedbackText = document.getElementById('feedback-text').value;
 
-            if (!platform || !feedbackText) {
-                alert('Veuillez remplir tous les champs.');
+            if (!feedbackText) {
+                alert('Veuillez remplir le champ de commentaire.');
                 return;
             }
 
             const feedbackItem = document.createElement('div');
             feedbackItem.classList.add('feedback-item');
-            feedbackItem.innerHTML = `
-                <p><strong>Plateforme :</strong> ${platform}</p>
-                <p>${feedbackText}</p>
-            `;
-
+            feedbackItem.innerHTML = `<p>${feedbackText}</p>`;
             feedbackList.appendChild(feedbackItem);
             feedbackForm.reset();
         });
-
-        // Récupérer le cookie lors du chargement de la page
-        window.onload = function() {
-            const username = getCookie("username");
-            if (username) {
-                console.log(`Bienvenue, ${username}`);
-            } else {
-                console.log("Utilisateur non connecté.");
-            }
-        };
     </script>
 </body>
 </html>
