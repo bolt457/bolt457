@@ -15,7 +15,7 @@ dependencies:
   flutter_bloc: ^8.0.0
   provider: ^6.0.0
   cached_network_image: ^3.0.0
-  intl: ^0.17.0               # Add this line to include the intl package
+  intl: ^0.20.1               # Add this line to include the intl package
   http: ^1.2.2
   firebase_data_connect: any  # Utilise la dernière version disponible
   video_player: ^2.9.2
