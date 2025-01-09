@@ -1,0 +1,66 @@
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
+}
+
+android {
+    namespace = "com.afribet.app"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.afribet.app"
+        minSdk = 23
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    kotlinOptions {
+        jvmTarget = "21"
+    }
+
+    signingConfigs {
+        def keystorePropertiesFile = rootProject.file("key.properties")
+        def keystoreProperties = new Properties()
+
+        if (keystorePropertiesFile.exists()) {
+            keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+        } else {
+            throw new GradleException("Le fichier key.properties est introuvable")
+        }
+
+        create("release") {
+            keyAlias = keystoreProperties['keyAlias'] ?: throw new GradleException("keyAlias est manquant")
+            keyPassword = keystoreProperties['keyPassword'] ?: throw new GradleException("keyPassword est manquant")
+            storeFile = file(keystoreProperties['storeFile'] ?: throw new GradleException("storeFile est manquant"))
+            storePassword = keystoreProperties['storePassword'] ?: throw new GradleException("storePassword est manquant")
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled = true
+            shrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+}

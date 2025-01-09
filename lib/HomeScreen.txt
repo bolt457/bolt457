@@ -1,0 +1,49 @@
+import 'package:flutter/material.dart';
+import 'package:afribet/screens/login_screen.dart';  // Assure-toi d'importer correctement LoginScreen
+import 'package:afribet/screens/signup_screen.dart';  // Assure-toi d'importer correctement SignupScreen
+import 'package:afribet/screens/video_screen.dart';  // Import de VideoScreen
+
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Afribet'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Bouton pour se connecter
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                );
+              },
+              child: Text('Se connecter'),
+            ),
+            // Bouton pour s'inscrire
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignupScreen()),
+                );
+              },
+              child: Text('S\'inscrire'),
+            ),
+            // Bouton pour voir la vidéo
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/video_screen');
+              },
+              child: Text('Voir la vidéo'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "898528400538",
+    "project_id": "afrimarket-197d0",
+    "storage_bucket": "afrimarket-197d0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:898528400538:android:d2f4cf62660fb56fc1bb23",
+        "android_client_info": {
+          "package_name": "com.afribet.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0uqWTnZRAxw3QtCr9_ncMSVNAlKDy5I0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
