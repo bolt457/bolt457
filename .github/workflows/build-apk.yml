@@ -1,55 +1,41 @@
-name: Build APK
+workflows:
+  build_apk:
+    name: Build APK
 
-on:
-  push:
-    branches:
-      - main
+    # Déclenchement des builds sur push
+    triggering:
+      events:
+        - push
+      branches:
+        only:
+          - main
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+    # Configuration de l'environnement
+    environment:
+      flutter: stable
+      java: 11
 
-    steps:
+    # Etapes du workflow
+    scripts:
       - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: 11
-          java-package: jdk
-          architecture: x64
-          check-latest: false
-          server-id: github
-          server-username: GITHUB_ACTOR
-          server-password: GITHUB_TOKEN
-          overwrite-settings: true
-          job-status: success
-
+        script: |
+          git clone $GIT_REPOSITORY_URL .
       - name: Install Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-
+        script: |
+          curl -sL https://deb.nodesource.com/setup_14.x | bash -
+          apt-get install -y nodejs
       - name: Navigate to JS Directory and Install Dependencies
-        run: |
+        script: |
           cd docs/public/js
-          npm install  # Ajoutez cette ligne pour générer le fichier package-lock.json
+          npm install  # Génération du fichier package-lock.json
           npm ci
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.0.0'  # Utilisez une version de Flutter qui inclut le SDK Dart >=2.17.0
-
-      - name: Build APK
-        run: |
+      - name: Get Flutter dependencies
+        script: |
           flutter pub get
+      - name: Build APK
+        script: |
           flutter build apk --release
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
-        with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+    # Définition des artefacts à télécharger
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
