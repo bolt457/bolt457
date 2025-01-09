@@ -18,6 +18,14 @@ jobs:
         with:
           java-version: 11
 
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install Dependencies
+        run: npm install
+
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -31,5 +39,3 @@ jobs:
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-```[_{{{CITATION{{{_2{[Bug]: `analyze` workflow fails because of deprecated version ... - GitHub](https://github.com/reactjs/react.dev/issues/7148)
-
