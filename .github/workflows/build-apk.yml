@@ -17,23 +17,26 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: 11
-          distribution: 'adopt'  # Ajoutez cette ligne
 
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '14'
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Navigate to JS Directory and Install Dependencies
+        run: |
+          cd docs/public/js
+          npm install
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '2.10.3'
+          flutter-version: '3.0.0'  # Utilisez une version de Flutter qui inclut le SDK Dart >=2.17.0
 
       - name: Build APK
-        run: flutter build apk --release
+        run: |
+          flutter pub get
+          flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
