@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart'; // Pour kIsWeb
+import 'package:flutter/services.dart';
 import 'screens/home_screen.dart';
 import 'screens/group_bet_screen.dart';
 import 'screens/portfolio_screen.dart';
@@ -8,30 +12,75 @@ import 'screens/tutorials_screen.dart';
 import 'screens/invest.dart';
 import 'screens/paris.dart';
 import 'screens/admin_screen.dart';
-import 'screens/payment_screen.dart'; // Import de l'écran Payment
-import 'screens/wallet_screen.dart'; // Import de WalletScreen
-import 'screens/video_screen.dart'; // Assurez-vous d'importer ce fichier
-import 'screens/login_screen.dart'; // Assurez-vous que LoginScreen est bien importé
-import 'screens/signup_screen.dart'; // Assurez-vous que SignupScreen est bien importé
+import 'screens/payment_screen.dart';
+import 'screens/wallet_screen.dart';
+import 'screens/video_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/signup_screen.dart';
+import 'screens/sign_in_page.dart';
+import 'screens/profile_screen.dart';  // Assurez-vous que cette importation est présente
 
-void main() async {
+// Ajout de la classe MyErrorsHandler ici
+class MyErrorsHandler {
+  Future<void> initialize() async {
+    // Initialisation (si nécessaire)
+  }
+
+  void onErrorDetails(FlutterErrorDetails details) {
+    print('Flutter Error: ${details.exception}');
+    print('Stack Trace: ${details.stack}');
+  }
+
+  void onError(Object error, StackTrace stack) {
+    print('Error: $error');
+    print('Stack Trace: $stack');
+  }
+}
+
+// Instanciation de MyErrorsHandler
+MyErrorsHandler myErrorsHandler = MyErrorsHandler();
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialisation de Firebase
   await Firebase.initializeApp(
     options: FirebaseOptions(
-      apiKey: "AIzaSyD8pDQPcl8tHbHG6RsOzm16zEYgun58Ebg",
-      authDomain: "afrimarket-197d0.firebaseapp.com",
-      projectId: "afrimarket-197d0",
-      storageBucket: "afrimarket-197d0.appspot.com",
-      messagingSenderId: "898528400538",
-      appId: "1:898528400538:web:7b651d10523c6f52c1bb23",
-      measurementId: "G-NW0N95K3ZN",
+      apiKey: "AIzaSyCWEhKlUQhbtTDpB26-5dupL0T-bHOJmXA",
+      authDomain: "afribet-de69d.firebaseapp.com",
+      databaseURL: "https://afribet-de69d-default-rtdb.firebaseio.com",
+      projectId: "afribet-de69d",
+      storageBucket: "afribet-de69d.appspot.com",
+      messagingSenderId: "820985331160",
+      appId: "1:820985331160:web:3de4c3fc156f6338e906ad",
+      measurementId: "G-J0G28ME35F",
     ),
   );
+
+  // Conditionner la persistance hors ligne pour ne pas l'exécuter sur le web
+  if (!kIsWeb) {
+    FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+  }
+
+  await myErrorsHandler.initialize();
+  
+  // Configuration de la gestion des erreurs
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    myErrorsHandler.onErrorDetails(details);
+  };
+
+  // Gestion des erreurs hors Flutter
+  PlatformDispatcher.instance.onError = (error, stack) {
+    myErrorsHandler.onError(error, stack);
+    return true;
+  };
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key); // Ajout du constructeur constant
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +90,20 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const HomeScreen(), // Utilisation du constructeur constant
+      home: FutureBuilder<User?>(
+        future: FirebaseAuth.instance.authStateChanges().first, // Utilisez authStateChanges pour écouter les changements d'état
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator(); // Affiche un indicateur de chargement
+          } else if (snapshot.hasData) {
+            // Si l'utilisateur est connecté
+            return const HomeScreen(); // Rediriger vers la HomeScreen
+          } else {
+            // Si l'utilisateur n'est pas connecté
+            return const LoginScreen(); // Afficher la page de connexion
+          }
+        },
+      ),
       routes: {
         '/group_bet': (context) => const GroupBetScreen(),
         '/portfolio': (context) => const PortfolioScreen(),
@@ -52,20 +114,23 @@ class MyApp extends StatelessWidget {
         '/admin': (context) => const AdminScreen(),
         '/payment': (context) => const PaymentScreen(),
         '/video_screen': (context) => const VideoScreen(),
-        '/wallet': (context) => const WalletScreen(), // Ajout de la route pour WalletScreen
+        '/wallet': (context) => const WalletScreen(),
+        '/sign_in': (context) => SignInPage(),
+        '/create_profile': (context) => const CreateProfileScreen(), // Redirection vers CreateProfileScreen
+        '/profile': (context) => const ProfileScreen(),
       },
     );
   }
 }
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key); // Ajout du constructeur constant
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Afribet'), // Utilisation de const
+        title: const Text('Afribet'),
       ),
       body: Center(
         child: Column(
@@ -75,31 +140,56 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()), // Utilisation du constructeur constant
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
                 );
               },
-              child: const Text('Se connecter'), // Utilisation de const
+              child: const Text('Se connecter'),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SignupScreen()), // Utilisation du constructeur constant
+                  MaterialPageRoute(builder: (context) => const SignupScreen()),
                 );
               },
-              child: const Text('S\'inscrire'), // Utilisation de const
+              child: const Text('S\'inscrire'),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/video_screen'); // Navigation vers l'écran vidéo
+                Navigator.pushNamed(context, '/create_profile');
               },
-              child: const Text('Voir la vidéo'), // Utilisation de const
+              child: const Text('Créer un profil'),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Ajoutez ici la page CreateProfileScreen
+class CreateProfileScreen extends StatelessWidget {
+  const CreateProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Créer un Profil'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Page pour créer un profil utilisateur"),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/wallet'); // Navigation vers WalletScreen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                );
               },
-              child: const Text('Portefeuille'), // Utilisation de const
+              child: const Text('Aller à mon profil'),
             ),
           ],
         ),
