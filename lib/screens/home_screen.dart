@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'login_screen.dart';
-import 'signup_screen.dart';
-import 'wallet_screen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+// Importation des écrans avec alias pour éviter les conflits
 import 'admin_screen.dart';
-import 'video_screen.dart';
+import 'video_screen.dart' as video; // Alias pour VideoScreen
 import 'group_bet_screen.dart';
 import 'portfolio_screen.dart';
 import 'rewards_screen.dart';
 import 'tutorials_screen.dart';
 import 'invest.dart';
 import 'paris.dart';
+import 'profile_screen.dart' as profile; // Utilisation d'un alias
+import 'wallet_screen.dart';
+import 'login_screen.dart';
+import 'create_profile_screen.dart';
+import 'post_screen.dart' as post; // Alias pour PostScreen
+import 'chatbot_screen.dart'; // Importation du ChatbotScreen
+import 'game_screen.dart'; // Importation du GameScreen
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -53,6 +59,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Liste des icônes et des écrans correspondants
+    final List<Map<String, dynamic>> _menuItems = [
+      {'icon': Icons.account_balance_wallet, 'label': 'Portefeuille', 'screen': WalletScreen()},
+      {
+        'icon': Icons.video_library,
+        'label': 'Vidéos',
+        'screen': const video.VideoScreen(), // Utilisation de l'alias pour VideoScreen
+      },
+      {'icon': Icons.group, 'label': 'Pari de Groupe', 'screen': GroupBetScreen()},
+      {'icon': Icons.account_tree, 'label': 'Portefeuille', 'screen': PortfolioScreen()},
+      {'icon': Icons.card_giftcard, 'label': 'Récompenses', 'screen': RewardsScreen()},
+      {'icon': Icons.book, 'label': 'Tutoriels', 'screen': TutorialsScreen()},
+      {'icon': Icons.monetization_on, 'label': 'Investir', 'screen': InvestScreen()},
+      {'icon': Icons.sports, 'label': 'Paris', 'screen': ParisScreen()},
+      {'icon': Icons.person, 'label': 'Profil', 'screen': profile.ProfileScreen()}, // Utilisation de l'alias
+      {'icon': Icons.admin_panel_settings, 'label': 'Admin', 'screen': AdminScreen()},
+      {
+        'icon': Icons.person_add,
+        'label': 'Créer Profil',
+        'screen': CreateProfileScreen(), // Suppression du paramètre onProfileUpdated
+      },
+      {'icon': Icons.message, 'label': 'Publications', 'screen': const post.PostScreen()}, // Utilisation de l'alias pour PostScreen
+      {'icon': Icons.chat, 'label': 'Chatbot', 'screen': ChatbotScreen()}, // Ajout du ChatbotScreen
+      {'icon': Icons.gamepad, 'label': 'Jeux', 'screen': GameScreen()}, // Ajout de GameScreen
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Afribet'),
@@ -63,121 +95,47 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              },
-              child: const Text('Se connecter'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignupScreen()),
-                );
-              },
-              child: const Text('S\'inscrire'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const WalletScreen()),
-                );
-              },
-              child: const Text('Portefeuille Africoins'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AdminScreen()),
-                );
-              },
-              child: const Text('Admin - Ajouter des fonds'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/group_bet');
-              },
-              child: const Text('Pari de Groupe'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/portfolio');
-              },
-              child: const Text('Suivi des Portefeuilles'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/rewards');
-              },
-              child: const Text('Récompenses'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/tutorials');
-              },
-              child: const Text('Tutoriels'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/invest');
-              },
-              child: const Text('Investissements'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/paris');
-              },
-              child: const Text('Paris'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/video_screen'); // Bouton pour naviguer vers l'écran vidéo
-              },
-              child: const Text('Voir la vidéo'),
-            ),
-          ],
+      body: GridView.builder(
+        padding: const EdgeInsets.all(10),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2, // Nombre de colonnes
+          childAspectRatio: 3 / 2, // Ratio hauteur/largeur
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
         ),
+        itemCount: _menuItems.length,
+        itemBuilder: (context, index) {
+          final item = _menuItems[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => item['screen']),
+              );
+            },
+            child: Card(
+              color: Colors.blueAccent,
+              elevation: 5,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    item['icon'],
+                    size: 40,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    item['label'],
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
-    );
-  }
-}
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Afribet',
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const HomeScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignupScreen(),
-        '/wallet': (context) => const WalletScreen(),
-        '/admin': (context) => const AdminScreen(),
-        '/video_screen': (context) => const VideoScreen(),
-        '/group_bet': (context) => const GroupBetScreen(),
-        '/portfolio': (context) => const PortfolioScreen(),
-        '/rewards': (context) => const RewardsScreen(),
-        '/tutorials': (context) => const TutorialsScreen(),
-        '/invest': (context) => const InvestScreen(),
-        '/paris': (context) => const ParisScreen(),
-      },
     );
   }
 }
